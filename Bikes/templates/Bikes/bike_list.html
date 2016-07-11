@@ -1,0 +1,18 @@
+{%  extends "layout.html" %}
+
+{% block title %}{{ bike_type.type }}{%  endblock %}
+
+{% block content %}
+    <div class="row">
+    {{ block.super }}
+        {%  for bike in bikes %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <img src="{{ bike.picture }}">
+                    <h5><a href="{% url 'bikes:details' types_pk=bike.type.pk bike_pk=bike.pk %}">{{ bike.name }}</a></h5>
+                    <p>{{ bike.type }}</p>
+                </div>
+            </div>
+        {%  endfor %}
+    </div>
+{% endblock %}
