@@ -7,7 +7,9 @@
         <h3>{{ bike.name }}</h3>
         <h5>{{ bike.type }}</h5>
         <img src="{{ bike.picture }}">
-        <p>${{ bike.price }}</p>
+        <p>{{ bike.price }}</p>
         <p>{{ bike.description }}</p>
+        <a href="{% url 'bikes:order' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Order now!</a>
     </div>
+
 {% endblock %}

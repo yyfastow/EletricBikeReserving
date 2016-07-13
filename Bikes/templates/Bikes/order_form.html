@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}Order an {{ bike.name }}!{% endblock %}
+
+{% block content %}
+    <div class="row column">
+        <h3>{{ bike.name }}</h3>
+        <h5>{{ bike.type }}</h5>
+        <img src="{{ bike.picture }}">
+        <p>{{ bike.price }}</p>
+        <p>{{ bike.description }}</p>
+    </div>
+    <div class="row columns">
+        <h3>Fill out this form to order an bike!</h3>
+        <form action="" method="POST">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" class="button">
+        </form>
+    </div>
+{%  endblock %}

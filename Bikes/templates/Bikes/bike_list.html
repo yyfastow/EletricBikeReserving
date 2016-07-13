@@ -11,6 +11,7 @@
                     <img src="{{ bike.picture }}">
                     <h5><a href="{% url 'bikes:details' types_pk=bike.type.pk bike_pk=bike.pk %}">{{ bike.name }}</a></h5>
                     <p>{{ bike.type }}</p>
+                    <p>{{ bike.price }}</p>
                 </div>
             </div>
         {%  endfor %}
