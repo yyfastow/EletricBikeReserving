@@ -1,4 +1,11 @@
 
 This is an project using Django.
-Its a site which is sassed to sell electric bikes.
-People could reserve the bikes.
+
+Its a site which is meant to sell electric bikes but could be for anything.
+People could reserve the bikes. We take there billing address phone number
+and credit card information and mail it to owner without charging the credit card.
+Then the owner could ship bike to user and use credit card mnumber to charge
+the costomer when ready to ship.
+
+The trying a lot of stuff here to test my django skills and my web development skills,
+so some stuff might not be needed for the site but needed to show my Skill.
