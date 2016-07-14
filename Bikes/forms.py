@@ -2,6 +2,8 @@ import localflavor
 from django import forms
 from localflavor.us.forms import USPhoneNumberField, USStateField, USZipCodeField
 
+from Bikes.credit_card_checker import CreditCardField, CCExpField
+
 
 def must_be_empty(value):
     if value:
@@ -24,10 +26,10 @@ class OrderForm(forms.Form):
     state2 = localflavor.us.forms.USStateSelect()
     address = forms.CharField(max_length=100)
     zip = USZipCodeField()
-    # number = CreditCardField(required = True, label = "Card Number")
-    # expiration = CCExpField(required = True, label = "Expiration")
-    # ccv_number = forms.IntegerField(required = True, label = "CCV Number",
-    #    max_value = 9999, widget = forms.TextInput(attrs={'size': '4'}))
+    number = CreditCardField(required = True, label = "Card Number")
+    expiration = CCExpField(required = True, label = "Expiration")
+    ccv_number = forms.IntegerField(required = True, label = "CCV Number",
+        max_value = 9999, widget = forms.TextInput(attrs={'size': '4'}))
 
     honeypot = forms.CharField(required=False,
                                widget=forms.HiddenInput,
