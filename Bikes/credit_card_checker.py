@@ -103,7 +103,7 @@ class CCExpField(forms.MultiValueField):
         return None
 
 
-class PaymentForm(forms.Form):
+"""class PaymentForm(forms.Form):
     number = CreditCardField(required=True, label="Card Number")
     holder = forms.CharField(required=True, label="Card Holder Name",
                              max_length=60)
@@ -136,4 +136,4 @@ class PaymentForm(forms.Form):
             from virtualmerchant import VirtualMerchant
             vmerchant = VirtualMerchant(datadict)
 
-            return vmerchant.process_virtualmerchant_payment()
+            return vmerchant.process_virtualmerchant_payment()"""

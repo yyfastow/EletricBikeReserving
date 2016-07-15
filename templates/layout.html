@@ -17,9 +17,11 @@
         <section class="top-bar-left">
             <ul class="dropdown menu" data-dropdown-menu role="menubar">
                 <li class="menu-text">The Electric Bike Shop!</li>
+                <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
             </ul>
         </section>
     </nav>
+
     {%  block content %}{%  endblock %}
     <footer class="row columns">
         <hr/>

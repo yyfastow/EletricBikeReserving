@@ -1,8 +1,36 @@
-import localflavor
-from django import forms
-from localflavor.us.forms import USPhoneNumberField, USStateField, USZipCodeField
+from datetime import datetime
 
-from Bikes.credit_card_checker import CreditCardField, CCExpField
+from django import forms
+
+from Bikes import models
+
+
+
+def get_cc_type(number):
+    """
+    Gets credit card type given number. Based on values from Wikipedia page
+    "Credit card number".
+    http://en.wikipedia.org/w/index.php?title=Credit_card_number
+       """
+    number = str(number)
+    # group checking by ascending length of number
+    if len(number) == 13:
+        if number[0] == "4":
+            return "Visa"
+    elif len(number) == 14:
+        if number[:2] == "36":
+            return "MasterCard"
+    elif len(number) == 15:
+        if number[:2] in ("34", "37"):
+            return "American Express"
+    elif len(number) == 16:
+        if number[:4] == "6011":
+            return "Discover"
+        if number[:2] in ("51", "52", "53", "54", "55"):
+            return "MasterCard"
+        if number[0] == "4":
+            return "Visa"
+    return "Unknown"
 
 
 def must_be_empty(value):
@@ -10,50 +38,62 @@ def must_be_empty(value):
         raise forms.ValidationError('is not empty')
 
 
-class OrderForm(forms.Form):
-    name = forms.CharField()
-    email = forms.EmailField()
-    verify_email = forms.EmailField(label="Please verify your email address")
-    phone = USPhoneNumberField()
-    """phone = forms.RegexField(
-        regex=r'^\+?1?\d{10,.15}$',
-        error_message=(
-            "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."
-        )
-    )"""
-    state = USStateField()
-    city = forms.CharField(max_length=25)
-    state2 = localflavor.us.forms.USStateSelect()
-    address = forms.CharField(max_length=100)
-    zip = USZipCodeField()
-    number = CreditCardField(required = True, label = "Card Number")
-    expiration = CCExpField(required = True, label = "Expiration")
-    ccv_number = forms.IntegerField(required = True, label = "CCV Number",
-        max_value = 9999, widget = forms.TextInput(attrs={'size': '4'}))
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = models.Order
+        fields = [
+            'name',
+            'email',
+            'phone',
+            'state',
+            'city',
+            'address',
+            'zip',
+            'number',
+            'expiration',
+            'ccv_number',
+        ]
 
+    verify_email = forms.EmailField(max_length=254, label="Please verify your email address")
     honeypot = forms.CharField(required=False,
                                widget=forms.HiddenInput,
                                label="leave empty",
                                validators=[must_be_empty],
                                )
-#    class Meta:
-#        model = models.Bikes
 
     def clean(self):
         cleaned_data = super().clean()
         name = cleaned_data.get('name')
         verify = cleaned_data.get('verify_email')
         email = cleaned_data.get('email')
-        phone = cleaned_data.get('phone1')
-        # phone = cleaned_data.get('phone')
+        phone = cleaned_data.get('phone')
         state = cleaned_data.get('state')
         city = cleaned_data.get('city')
         address = cleaned_data.get('address')
         zip = cleaned_data.get('zip')
+        number = cleaned_data.get('number')
+        expiration = cleaned_data.get('expiration')
+        ccv_number = cleaned_data.get('ccv_number')
 
         if email != verify:
             raise forms.ValidationError(
                 "You need to enter the same email in both fields"
             )
 
+        if expiration == datetime.now():
+            raise forms.ValidationError(
+                "Credit card can not be expired"
+            )
 
+        if number and (len(str(number)) < 13 or len(str(number)) > 16):
+            raise forms.ValidationError("Please enter in a valid " + \
+                                        "credit card number.")
+        elif get_cc_type(number) not in ("Visa", "MasterCard",
+                                         "American Express"):
+            raise forms.ValidationError("Please enter in a Visa, " + \
+                                        "Master Card, or American Express credit card number.")
+
+        if ccv_number and len(str(ccv_number)) > 4:
+            raise forms.ValidationError(
+                "Make sure to add your ccv number no more then 4 digits!"
+            )

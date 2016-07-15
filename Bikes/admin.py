@@ -5,3 +5,4 @@ from Bikes import models
 
 admin.site.register(models.BikeTypes)
 admin.site.register(models.Bikes)
+admin.site.register(models.Order)
