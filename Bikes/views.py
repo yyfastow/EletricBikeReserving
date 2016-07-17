@@ -1,4 +1,7 @@
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms import forms
@@ -7,7 +10,6 @@ from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
 from Bikes import models, forms
-from EletricBikeReserving import settings
 
 
 def bike_type_list(request):
@@ -47,20 +49,59 @@ def order_bike(request, types_pk, bike_pk):
             order = form.save(commit=False)
             order.order = bike
             order.save()
-            send_mail(
+            bike.preorders += 1
+            bike.save()
+            user = User.objects.create_user(
+                form.cleaned_data['email'],
+                form.cleaned_data['email'],
+                form.cleaned_data['password']
+            )
+            """send_mail(
                 "Order for {}".format(bike.name),
-                """Bike: {}
+                ""Bike: {}
                 Name: {name}
                 Phone Number: {phone}
                 Billing Address: {address} {city} {state} {zip}
                     expiration: {expiration}
                     CCV number: {ccv_number}
 
-                """.format(bike.name, **form.cleaned_data),
+                "".format(bike.name, **form.cleaned_data),
                 '{name} <{email}>'.format(**form.cleaned_data),
                 ['yoseffastow@gmail.com'],
-            )
-            # TODO: fix messages or better make a view confirming transaction and gives information about contacting
+            )"""
             messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             return HttpResponseRedirect(reverse('bikes:type'))
     return render(request, 'bikes/order_form.html', {'form': form, 'bike': bike})
+
+@login_required
+def users_orders(request):
+    pass
+
+
+
+def loginer(request):
+    form = forms.LoginForm()
+    if request.method == 'POST':
+        form = forms.LoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['email'],
+                password=form.cleaned_data['password']
+            )
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    messages.add_message(request, messages.SUCCESS, "You are now login!")
+                    return HttpResponseRedirect(reverse('bikes:type'))
+                else:
+                    messages.add_message(request, messages.ERROR, "This account has been disabled sorry!")
+                    return HttpResponseRedirect(reverse('bikes:type'))
+            else:
+                messages.add_message(request, messages.ERROR, "Invalid Login!")
+    return render(request, 'bikes/login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    messages.add_message(request, messages.SUCCESS, "Logout Successfully!")
+    return HttpResponseRedirect(reverse('bikes:type'))

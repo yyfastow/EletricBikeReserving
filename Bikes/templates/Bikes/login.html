@@ -1,0 +1,15 @@
+{%  extends "layout.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <div class="row columns">
+        <h3>Login to be able to look and change your orders</h3>
+        <p>You make an account by preordering a bike</p>
+        <form action="" method="POST">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" class="button">
+        </form>
+    </div>
+{% endblock %}

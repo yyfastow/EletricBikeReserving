@@ -24,7 +24,8 @@ class Bikes(models.Model):
                        decimal_places=2,
                        default_currency='USD'
                        )
-    
+    orders_needed = models.IntegerField(default=5)
+    preorders = models.IntegerField(default=0)
 
 
     def get_absolute_url(self):
@@ -42,6 +43,7 @@ class Order(models.Model):
     order = models.ForeignKey(Bikes)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
+    password = models.CharField(max_length=20)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone Number")
     phone = models.CharField(max_length=17, validators=[phone_regex])
     state = USStateField()
@@ -54,9 +56,5 @@ class Order(models.Model):
                                     # validators=([MaxValueValidator(9999)]))
 
     # , widget = forms.TextInput(attrs={'size': '4'})
-
-    def validate_ccv_number(self, ):
-        pass
-
     def __str__(self):
         return self.name

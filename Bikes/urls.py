@@ -4,6 +4,8 @@ from Bikes import views
 
 urlpatterns = [
     url(r'^$', views.bike_type_list, name='type'),
+    url(r'login/$', views.loginer, name='login'),
+    url(r'logout/$', views.logout_view, name='logout'),
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/$', views.bike_details, name='details'),
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/order/$', views.order_bike, name='order'),
     url(r'(?P<pk>\d+)/$', views.bike_list, name='list'),

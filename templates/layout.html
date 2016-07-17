@@ -18,9 +18,23 @@
             <ul class="dropdown menu" data-dropdown-menu role="menubar">
                 <li class="menu-text">The Electric Bike Shop!</li>
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:login' %}">Login</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
             </ul>
         </section>
     </nav>
+    {% if messages %}
+        <div class="row">
+            <div class="small-6 small-centered columns">
+                {% for message in messages %}
+                    <div data-alert class="alert-box {{ message.tags }}redius">
+                        {{ message }}
+                        <a href="#" class="close">&times;</a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 
     {%  block content %}{%  endblock %}
     <footer class="row columns">
