@@ -112,10 +112,12 @@ class OrderForm(forms.ModelForm):
 
 
 class LoginForm(forms.Form):
+    name = forms.CharField(max_length=100, label="name  ")
     email = forms.EmailField(max_length=254, label="Email:  ")
     password = forms.CharField(widget=forms.PasswordInput)
 
     def clean(self):
         cleaned_data = super().clean()
+        name = cleaned_data.get('name')
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')

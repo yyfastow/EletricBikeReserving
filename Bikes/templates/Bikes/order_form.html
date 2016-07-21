@@ -9,6 +9,7 @@
         <img src="{{ bike.picture }}">
         <p>{{ bike.price }}</p>
         <p>{{ bike.description }}</p>
+        <p><a href="{% url 'bikes:type' %}">Edit order</a></p>
     </div>
     <div class="row columns">
         <h3>Fill out this form to order an bike!</h3>

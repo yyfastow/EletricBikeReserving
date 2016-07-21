@@ -1,0 +1,13 @@
+{%  extends "layout.html" %}
+
+{% block title %}Order {% endblock %}
+
+{% block content %}
+    <div class="row columns">
+        <form action="" method="POST">
+            <h5>Are you sure you want to order {{ bike.name }} for {{ bike.price }}</h5>
+            {% csrf_token %}
+            <input type="submit" class="button">
+        </form>
+    </div>
+{% endblock %}

@@ -2,6 +2,10 @@
 
 {%  block title %} Electric Bikes shop {%  endblock %}
 
+{% block submenu %}
+    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+{% endblock %}
+
 {%  block content %}
     <div class="row">
         <h3>Welcome to the bike shop.Reserve the bike of your choice now!</h3>

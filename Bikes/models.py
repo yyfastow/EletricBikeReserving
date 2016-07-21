@@ -25,7 +25,7 @@ class Bikes(models.Model):
                        default_currency='USD'
                        )
     orders_needed = models.IntegerField(default=5)
-    preorders = models.IntegerField(default=0)
+    orders = models.IntegerField(default=0)
 
 
     def get_absolute_url(self):
@@ -40,7 +40,7 @@ class Bikes(models.Model):
 
 
 class Order(models.Model):
-    order = models.ForeignKey(Bikes)
+    total_charge = models.FloatField(default=0)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
     password = models.CharField(max_length=20)
@@ -58,3 +58,12 @@ class Order(models.Model):
     # , widget = forms.TextInput(attrs={'size': '4'})
     def __str__(self):
         return self.name
+
+
+
+class Preorders(models.Model):
+    user_info = models.ForeignKey(Order)
+    order = models.ForeignKey(Bikes)
+
+    def __str__(self):
+        return self.order.name

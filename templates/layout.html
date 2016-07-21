@@ -17,9 +17,13 @@
         <section class="top-bar-left">
             <ul class="dropdown menu" data-dropdown-menu role="menubar">
                 <li class="menu-text">The Electric Bike Shop!</li>
-                <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
-                <li class="has-submenu"><a href="{% url 'bikes:login' %}">Login</a></li>
-                <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
+                {% block submenu %}{% endblock %}
+                {% if user.is_authenticated %}
+                    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
+                    <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
+                {% else %}
+                    <li class="has-submenu"><a href="{% url 'bikes:login' %}">Login</a></li>
+                {% endif %}
             </ul>
         </section>
     </nav>
