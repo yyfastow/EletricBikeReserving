@@ -18,7 +18,11 @@
             <ul class="dropdown menu" data-dropdown-menu role="menubar">
                 <li class="menu-text">The Electric Bike Shop!</li>
                 {% block submenu %}{% endblock %}
-                {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
+                    <li class="has-submenu"><a href="{% url 'bikes:all_orders' %}">orders</a></li>
+                    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+                {% elif user.is_authenticated %}
                     <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
                     <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
                 {% else %}
@@ -39,6 +43,11 @@
             </div>
         </div>
     {% endif %}
+
+    {% if user.is_superuser %}
+        <h1>Admin</h1>
+    {% endif %}
+
 
     {%  block content %}{%  endblock %}
     <footer class="row columns">

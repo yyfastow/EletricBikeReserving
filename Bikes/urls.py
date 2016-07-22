@@ -6,6 +6,11 @@ urlpatterns = [
     url(r'^$', views.bike_type_list, name='type'),
     url(r'login/$', views.loginer, name='login'),
     url(r'logout/$', views.logout_view, name='logout'),
+
+    url(r'superuser/$', views.admin_orders, name="all_orders"),
+    url(r'superuser/(?P<pk>\d+)/$', views.admin_user_preorders, name="users_orders"),
+    url(r'superuser/bike/(?P<pk>\d+)$', views.admin_orders_bike, name="bike_ordered"),
+
     url(r'user/$', views.users_orders, name='user'),
     url(r'user/(?P<pk>\d+)/$', views.order_details, name='order_detail'),
     url(r'user/edit/$', views.edit_order, name='edit'),

@@ -12,7 +12,9 @@
         <p> Preorders needed to confirm orders: {{ bike.orders_needed }}</p>
         <p> Preorders now:  {{ bike.orders }}</p>
         <p>Preorders left:  </p>
-        {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+            <a href="{% url 'bikes:bike_ordered' pk=bike.pk %}" class="button">Veiw all orders!</a>
+        {% elif user.is_authenticated %}
              <a href="{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Order now!</a>
         {% else %}
              <a href="{% url 'bikes:order' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Make an account and Order!</a>

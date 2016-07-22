@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title %}Admin (all orders){% endblock %}
+
+{% block content %}
+    <div class="row">
+        {%  for order in orders %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <h5>Name: {{ order.name }}</h5>
+                    <ul>
+                        <li>Email: {{ order.email }}</li>
+                        <li>Phone: {{ order.phone }}</li>
+                        <li>Billing Address: {{ order.address }} {{ order.city }} {{ order.state }} {{ order.zip }}</li>
+                        <li>Credit Card Number: {{ order.number }}</li>
+                        <li>    Expiration: {{ order.expiration }}</li>
+                        <li>    CCV number: {{ order.ccv_number }}</li>
+                        <li>total to charge: {{ order.total_charge }}</li>
+                        <li><a href="{% url 'bikes:users_orders' pk=order.pk %}">See all Bikes Ordered by {{ order.name }}</a></li>
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

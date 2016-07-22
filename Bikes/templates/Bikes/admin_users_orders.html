@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ order.name }} orders{% endblock %}
+
+{% block submenu %}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <p>Total charged:  {{ order.total_charge }}</p>
+        <h3>These are the bikes {{ order.name }} ordered:</h3>
+        <p></p>
+    </div>
+    <div class="row">
+        {%  for preorder in preorders %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <h5>{{ preorder.order }}</h5>
+                    <p>{{ preorder.order.price }}</p>
+                    <img src="{ preorder.order.picture }}">
+                </div>
+            </div>
+        {%  endfor %}
+    </div>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.forms import forms
@@ -12,6 +12,7 @@ from Bikes import models, forms
 from Bikes.models import Preorders
 
 
+# All Bikes views
 def bike_type_list(request):
     """ shows all types of bikes available """
     bike_types = models.BikeTypes.objects.all()
@@ -37,6 +38,27 @@ def bike_details(request, types_pk, bike_pk):
     return render(request,
                   'bikes/bikes_details.html',
                   {'bike': bike})
+
+
+# Users Views
+@login_required
+def users_orders(request):
+    """show all orders from current user"""
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    preorders = models.Preorders.objects.filter(user_info=order)
+    return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
+
+
+@login_required
+def order_details(request, pk):
+    user = request.user
+    order = get_object_or_404(models.Preorders, pk=pk)
+    if order.user_info.email != user.email:
+        return users_orders(request)
+    return render(request,
+                  'bikes/order_details.html',
+                  {'user': user, 'order': order})
 
 
 @login_required
@@ -103,7 +125,7 @@ except User.DoesNotExist:
     return cleaned_data"""
 
 
-
+# Ordering bikes
 def order_bike(request, types_pk, bike_pk):
     """ makes form to order bike """
     bike = get_object_or_404(models.Bikes, pk=bike_pk)
@@ -156,27 +178,7 @@ def order_another_bike(request, types_pk, bike_pk):
     return render(request, 'bikes/confirm_order.html', {'bike': bike})
 
 
-
-@login_required
-def users_orders(request):
-    """show all orders from current user"""
-    user = request.user
-    order = models.Order.objects.get(name=user.username, email=user.email)
-    preorders = models.Preorders.objects.filter(user_info=order)
-    return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
-
-
-@login_required
-def order_details(request, pk):
-    user = request.user
-    order = get_object_or_404(models.Preorders, pk=pk)
-    if order.user_info.email != user.email:
-        return users_orders(request)
-    return render(request,
-                  'bikes/order_details.html',
-                  {'user': user, 'order': order})
-
-
+# Loggin in and out
 def loginer(request):
     """Logins user"""
     form = forms.LoginForm()
@@ -205,3 +207,24 @@ def logout_view(request):
     logout(request)
     messages.add_message(request, messages.SUCCESS, "Logout Successfully!")
     return HttpResponseRedirect(reverse('bikes:type'))
+
+
+# Admin views
+@user_passes_test(lambda user: user.is_superuser)
+def admin_orders(request):
+    orders = models.Order.objects.all()
+    return render(request, 'bikes/all_orders.html', {'orders': orders})
+
+
+@user_passes_test(lambda user: user.is_superuser)
+def admin_user_preorders(request, pk):
+    order = models.Order.objects.get(pk=pk)
+    preorders = models.Preorders.objects.filter(user_info=order)
+    return render(request, 'bikes/admin_users_orders.html', {'preorders': preorders, 'order': order})
+
+
+@user_passes_test(lambda user: user.is_superuser)
+def admin_orders_bike(request, pk):
+    bike = get_object_or_404(models.Bikes, pk=pk)
+    preorders = models.Preorders.objects.filter(order=bike)
+    return render(request, 'bikes/orders_list.html', {'bike': bike, 'preorders': preorders})
