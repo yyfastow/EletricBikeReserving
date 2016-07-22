@@ -40,10 +40,12 @@ class Bikes(models.Model):
 
 
 class Order(models.Model):
-    total_charge = models.FloatField(default=0)
+    total_charge = MoneyField(max_digits=7,
+                       decimal_places=2,
+                       default_currency='USD'
+                       )
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
-    password = models.CharField(max_length=20)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone Number")
     phone = models.CharField(max_length=17, validators=[phone_regex])
     state = USStateField()

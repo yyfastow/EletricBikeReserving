@@ -38,9 +38,23 @@ def must_be_empty(value):
         raise forms.ValidationError('is not empty')
 
 
+class PasswordForm(forms.Form):
+    password = forms.CharField(widget=forms.PasswordInput)
+    verify_password = forms.CharField(max_length=20, label="Please verify your password", widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        verify_password = cleaned_data.get('verify_password')
+
+        if password != verify_password:
+            raise forms.ValidationError(
+                "You need to enter the same password in password and Verity Password Fields"
+            )
+
+
 class OrderForm(forms.ModelForm):
     ccv_number = forms.IntegerField(widget=forms.TextInput(attrs={'size': '4'}))
-    password = forms.CharField(widget=forms.PasswordInput)
 
     class Meta:
         model = models.Order
@@ -55,11 +69,9 @@ class OrderForm(forms.ModelForm):
             'expiration',
             'ccv_number',
             'email',
-            'password',
         ]
 
     verify_email = forms.EmailField(max_length=254, label="Please verify your email address")
-    verify_password = forms.CharField(max_length=20, label="Please verify your password", widget=forms.PasswordInput)
     honeypot = forms.CharField(required=False,
                                widget=forms.HiddenInput,
                                label="leave empty",
@@ -71,8 +83,6 @@ class OrderForm(forms.ModelForm):
         name = cleaned_data.get('name')
         verify = cleaned_data.get('verify_email')
         email = cleaned_data.get('email')
-        password = cleaned_data.get('password')
-        verify_passowrd = cleaned_data.get('verify_password')
         phone = cleaned_data.get('phone')
         state = cleaned_data.get('state')
         city = cleaned_data.get('city')
@@ -85,11 +95,6 @@ class OrderForm(forms.ModelForm):
         if email != verify:
             raise forms.ValidationError(
                 "You need to enter the same email in both fields"
-            )
-
-        if password != verify_passowrd:
-            raise forms.ValidationError(
-                "You need to enter the same password in password and Verity Password Fields"
             )
 
         if expiration == datetime.now():

@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms import forms
 from django.http import HttpResponseRedirect
@@ -41,28 +40,79 @@ def bike_details(request, types_pk, bike_pk):
 
 
 @login_required
-def edit_order(request, pk):
+def edit_order(request):
+    """form to edit information of user"""
     user = request.user
-    order = get_object_or_404(models.Order, pk=pk)
-    if order.email != user.email:
-        return users_orders(request)
+    order = models.Order.objects.get(name=user.username, email=user.email)
     form = forms.OrderForm(instance=order)
     if request.method == 'POST':
-        form = forms.OrderForm(request.POST, instance=order)
-        if form.is_valid:
+        form = forms.OrderForm(request.POST, instance=order,)
+        if form.is_valid():
             form.save()
+            user.username = form.cleaned_data['name']
+            user.email = form.cleaned_data['email']
+            user.save()
             messages.success(request, "updated Order!")
-            return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/order_form.html', {'order': order})
+            # TODO: login automatically
+            return HttpResponseRedirect(reverse('bikes:login'))
+    return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form})
+
+
+@login_required()
+def change_password(request):
+    user = request.user
+    form = forms.PasswordForm()
+    if request.method == 'POST':
+        form = forms.PasswordForm(request.POST)
+        if form.is_valid():
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request, "Changed Password!")
+            # TODO: login automatically
+            return HttpResponseRedirect(reverse('bikes:login'))
+    return render(request, 'bikes/edit_order.html', {'user': user,
+                                                          'form': form})
+
+
+@login_required()
+def cancel_order(request, pk):
+    """ cancel an order"""
+    user = request.user
+    preorder = get_object_or_404(models.Preorders, pk=pk)
+    order = models.Order.objects.get(name=preorder.user_info.name)
+    bike = models.Bikes.objects.get(name=preorder.order)
+    if request.method == 'POST':
+        preorder.delete()
+        order.total_charge -= bike.price
+        order.save()
+        bike.orders -= 1
+        bike.save()
+        messages.add_message(request, messages.SUCCESS, "canceled order")
+        return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/cancel_order.html', {'preorder': preorder})
+
+
+
+"""try:
+    existing_user = User.objects.get(username=cleaned_data.get('username'))
+    error_msg = u'Username already exists.'
+    self._errors['username'] = self.error_class([error_msg])
+    del cleaned_data['username']
+    return cleaned_data
+except User.DoesNotExist:
+    return cleaned_data"""
+
 
 
 def order_bike(request, types_pk, bike_pk):
     """ makes form to order bike """
     bike = get_object_or_404(models.Bikes, pk=bike_pk)
     form = forms.OrderForm()
+    password = forms.PasswordForm()
     if request.method == "POST":
         form = forms.OrderForm(request.POST)
-        if form.is_valid():
+        password = forms.PasswordForm(request.POST)
+        if form.is_valid() and password.is_valid():
             order = form.save(commit=False)
             order.total_charge = bike.price
             order.save()
@@ -72,7 +122,7 @@ def order_bike(request, types_pk, bike_pk):
             user = User.objects.create_user(
                 form.cleaned_data['name'],
                 form.cleaned_data['email'],
-                form.cleaned_data['password']
+                password.cleaned_data['password']
             )
             """send_mail(
                 "Order for {}".format(bike.name),
@@ -88,7 +138,7 @@ def order_bike(request, types_pk, bike_pk):
             )"""
             messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             return HttpResponseRedirect(reverse('bikes:login'))
-    return render(request, 'bikes/order_form.html', {'form': form, 'bike': bike})
+    return render(request, 'bikes/order_form.html', {'form': form, 'bike': bike, 'password': password})
 
 
 @login_required
@@ -113,7 +163,7 @@ def users_orders(request):
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
     preorders = models.Preorders.objects.filter(user_info=order)
-    return render(request, 'bikes/user_orders.html', {'user':user, 'order': order, 'preorders': preorders})
+    return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
 
 
 @login_required

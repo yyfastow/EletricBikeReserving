@@ -3,8 +3,9 @@
 {% block title %}{{ user.username }} orders{% endblock %}
 
 {% block submenu %}
-    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Change Password</a></li>
-    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Change account information</a></li>
+    <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
+    <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
+    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
 {% endblock %}
 
 {% block content %}
@@ -14,15 +15,14 @@
         <p></p>
     </div>
     <div class="row">
-        {%  for order in preorders %}
+        {%  for preorder in preorders %}
             <div class="small-6 columns">
                 <div class="callout">
-                    <a href="{% url 'bikes:order_detail' pk=order.pk %}">
-                    <h5>{{ order.order }}</h5>
-                    <p>{{ order.order.price }}</p>
-                    <img src="{ order.order.picture }}">
-                    <p><a href="{% url 'bikes:edit' pk=order.pk %}">Edit order</a></p>
-                    <p><a href="{% url 'bikes:order_detail' pk=order.pk %}">View order</a></p>
+                    <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
+                    <h5>{{ preorder.order }}</h5>
+                    <p>{{ preorder.order.price }}</p>
+                    <img src="{ preorder.order.picture }}">
+                    <h6><a href="{%  url 'bikes:cancel' pk=preorder.pk %}">Cancel Order</a></h6>
                 </a>
                 </div>
             </div>

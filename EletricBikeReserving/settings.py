@@ -132,7 +132,9 @@ STATICFILES_DIRS = (
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'orders')
 
-
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
 # for gmail --- google apps
 """ It works the way it is (with proper password (took it out)) but gmail throws it out for security reasons
 
