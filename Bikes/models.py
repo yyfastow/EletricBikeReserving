@@ -1,5 +1,4 @@
-import localflavor
-from django.core.validators import RegexValidator, MaxValueValidator
+from django.core.validators import RegexValidator
 from django.db import models
 from djmoney.models.fields import MoneyField
 
@@ -44,6 +43,7 @@ class Order(models.Model):
                        decimal_places=2,
                        default_currency='USD'
                        )
+    # charged = models.FloatField(default=0)
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone Number")
@@ -66,6 +66,7 @@ class Order(models.Model):
 class Preorders(models.Model):
     user_info = models.ForeignKey(Order)
     order = models.ForeignKey(Bikes)
+    status = models.CharField(max_length=25, default="reserved")
 
     def __str__(self):
         return self.order.name

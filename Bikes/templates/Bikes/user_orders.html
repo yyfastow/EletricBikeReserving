@@ -10,9 +10,12 @@
 
 {% block content %}
     <div class="row">
-        <p>Total charged:  {{ order.total_charge }}</p>
-        <h3>These are the bikes {{ user.username }} ordered:</h3>
-        <p></p>
+        <p>Total that you will be charged:  {{ order.total_charge }}</p>
+        {% if preorders %}
+            <h3>These are the bikes {{ user.username }} ordered:</h3>
+        {% else %}
+            <h3>No bikes are reserved now! <a href="{% url 'bikes:ready' %}">check your shipped or ready to ship bikes!</a></h3>
+        {% endif %}
     </div>
     <div class="row">
         {%  for preorder in preorders %}

@@ -9,5 +9,5 @@ register = template.Library()
 @register.filter('preorders_needed')
 def preorders_needed(bike):
     """ returns how much preorders are needed until """
-    left = bike.orders_needed - bike.preorders
+    left = bike.orders_needed - bike.orders
     return left

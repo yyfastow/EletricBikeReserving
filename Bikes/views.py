@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms import forms
 from django.http import HttpResponseRedirect
@@ -46,9 +47,18 @@ def users_orders(request):
     """show all orders from current user"""
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
-    preorders = models.Preorders.objects.filter(user_info=order)
+    preorders = models.Preorders.objects.filter(user_info=order, status="reserved")
     return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
 
+
+@login_required
+def users_orders_ready(request):
+    """show all orders from current user"""
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
+    shipped = models.Preorders.objects.filter(user_info=order, status="shipped")
+    return render(request, 'bikes/orders_ready.html', {'user': user, 'order': order, 'shipping': shipping, 'shipped': shipped})
 
 @login_required
 def order_details(request, pk):
@@ -103,7 +113,7 @@ def cancel_order(request, pk):
     preorder = get_object_or_404(models.Preorders, pk=pk)
     order = models.Order.objects.get(name=preorder.user_info.name)
     bike = models.Bikes.objects.get(name=preorder.order)
-    if request.method == 'POST':
+    if request.method == 'POST' and preorder.status == 'reserved':
         preorder.delete()
         order.total_charge -= bike.price
         order.save()
@@ -111,7 +121,7 @@ def cancel_order(request, pk):
         bike.save()
         messages.add_message(request, messages.SUCCESS, "canceled order")
         return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/cancel_order.html', {'preorder': preorder})
+    return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
 
 
 
@@ -146,21 +156,40 @@ def order_bike(request, types_pk, bike_pk):
                 form.cleaned_data['email'],
                 password.cleaned_data['password']
             )
-            """send_mail(
-                "Order for {}".format(bike.name),
-                ""Bike: {}
-                Name: {name}
-                Phone Number: {phone}
-                Billing Address: {address} {city} {state} {zip}
-                    expiration: {expiration}
-                    CCV number: {ccv_number}
-                "".format(bike.name, **form.cleaned_data),
-                '{name} <{email}>'.format(**form.cleaned_data),
-                ['yoseffastow@gmail.com'],
-            )"""
-            messages.add_message(request, messages.SUCCESS, "Your order is sent!")
+            if bike.orders >= bike.orders_needed:
+                anought_orders(request, bike)
+            else:
+                messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             return HttpResponseRedirect(reverse('bikes:login'))
     return render(request, 'bikes/order_form.html', {'form': form, 'bike': bike, 'password': password})
+
+
+def anought_orders(request, bike):
+    earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
+    for early in earlier_orders:
+        user_in = early.user_info
+        early.status = "shipping"
+        early.save()
+        send_mail(
+            "Order for {}".format(bike.name),
+            """Bike: {}
+            Name: {}
+            Phone Number: {}
+            Billing Address: {} {} {} {}
+            Credit Card Number: {}
+            expiration: {}
+            CCV number: {}
+            """.format(bike.name, user_in.name, user_in.phone, user_in.address, user_in.city,
+                user_in.state, user_in.zip, user_in.number, user_in.expiration, user_in.ccv_number),
+            '{} <{}>'.format(user_in.name, user_in.email),
+            ['yoseffastow@gmail.com'],
+        )
+        user = models.Order.objects.get(name=early.user_info.name)
+        user.total_charge -= bike.price
+        user.save()
+    bike.orders = 0
+    bike.save()
+    messages.add_message(request, messages.SUCCESS, "You order is sent and ready for shipping")
 
 
 @login_required
@@ -172,8 +201,13 @@ def order_another_bike(request, types_pk, bike_pk):
         order = models.Order.objects.get(name=user.username, email=user.email)
         order.total_charge += bike.price
         order.save()
+        bike.orders += 1
+        bike.save()
         Preorders.objects.create(user_info=order, order=bike)
-        messages.add_message(request, messages.SUCCESS, "Your order is sent!")
+        if bike.orders >= bike.orders_needed:
+            anought_orders(request, bike)
+        else:
+            messages.add_message(request, messages.SUCCESS, "Your order is sent!")
         return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/confirm_order.html', {'bike': bike})
 
@@ -204,6 +238,7 @@ def loginer(request):
 
 
 def logout_view(request):
+    """logs out user"""
     logout(request)
     messages.add_message(request, messages.SUCCESS, "Logout Successfully!")
     return HttpResponseRedirect(reverse('bikes:type'))
@@ -212,12 +247,14 @@ def logout_view(request):
 # Admin views
 @user_passes_test(lambda user: user.is_superuser)
 def admin_orders(request):
+    """admin could see all costomers"""
     orders = models.Order.objects.all()
     return render(request, 'bikes/all_orders.html', {'orders': orders})
 
 
 @user_passes_test(lambda user: user.is_superuser)
 def admin_user_preorders(request, pk):
+    """admin could see all orders by person """
     order = models.Order.objects.get(pk=pk)
     preorders = models.Preorders.objects.filter(user_info=order)
     return render(request, 'bikes/admin_users_orders.html', {'preorders': preorders, 'order': order})
@@ -225,6 +262,34 @@ def admin_user_preorders(request, pk):
 
 @user_passes_test(lambda user: user.is_superuser)
 def admin_orders_bike(request, pk):
+    """admin could see all orders by bike"""
     bike = get_object_or_404(models.Bikes, pk=pk)
     preorders = models.Preorders.objects.filter(order=bike)
     return render(request, 'bikes/orders_list.html', {'bike': bike, 'preorders': preorders})
+
+
+@user_passes_test(lambda user: user.is_superuser)
+def orders_ready_to_ship(request):
+    """admin sees all items ready to ship"""
+    preorders = models.Preorders.objects.filter(status="shipping")
+    shipped = models.Preorders.objects.filter(status="shipped")
+    return render(request, 'bikes/orders_shiping.html', {'preorders': preorders, 'shipped': shipped})
+
+
+@user_passes_test(lambda user: user.is_superuser)
+def shipping_order(request, pk):
+    """ admin confirms that item is sent and marks it as shipped"""
+    preorder = models.Preorders.objects.get(pk=pk)
+    preorder.status = 'shipped'
+    preorder.save()
+    messages.add_message(request, messages.SUCCESS, "Marked as shipped")
+    return HttpResponseRedirect(reverse('bikes:shipping'))
+
+@user_passes_test(lambda user: user.is_superuser)
+def recieved_order(request, pk):
+    """ admin confirms that item is sent and marks it as shipped"""
+    preorder = models.Preorders.objects.get(pk=pk)
+    preorder.status = 'recieved'
+    preorder.save()
+    messages.add_message(request, messages.SUCCESS, "Marked as revieved")
+    return HttpResponseRedirect(reverse('bikes:shipping'))

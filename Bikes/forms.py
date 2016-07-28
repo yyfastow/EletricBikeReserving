@@ -4,11 +4,12 @@ from django import forms
 
 from Bikes import models
 
-
-
+# TODO: use stripe to charge, need to make account with them
+# I wont do this unless this site really becomes something that charged people
+# for I cant play around with credit charges.
 def get_cc_type(number):
     """
-    Gets credit card type given number. Based on values from Wikipedia page
+    Gets credit card type given number. Based on values from Wikipedia page/
     "Credit card number".
     http://en.wikipedia.org/w/index.php?title=Credit_card_number
        """
@@ -120,6 +121,11 @@ class LoginForm(forms.Form):
     name = forms.CharField(max_length=100, label="name  ")
     email = forms.EmailField(max_length=254, label="Email:  ")
     password = forms.CharField(widget=forms.PasswordInput)
+    honeypot = forms.CharField(required=False,
+                               widget=forms.HiddenInput,
+                               label="leave empty",
+                               validators=[must_be_empty],
+                               )
 
     def clean(self):
         cleaned_data = super().clean()

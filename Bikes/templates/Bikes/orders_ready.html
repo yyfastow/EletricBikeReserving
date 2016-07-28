@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ user.username }} orders{% endblock %}
+
+{% block submenu %}
+    <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
+    <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
+    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+{% endblock %}
+
+{% block content %}
+    {% if shipping or shipped %}
+        <p>Total that you will be charged:  {{ order.total_charge }}</p>
+        {% if shipping %}
+        <h3>These are the bikes ready to ship:</h3>
+    <div class="row">
+        {%  for preorder in shipping %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
+                    <h5>{{ preorder.order }}</h5>
+                    <p>{{ preorder.order.price }}</p>
+                    <img src="{ preorder.order.picture }}">
+                    <p>status: {{ preorder.status }}</p>
+                </a>
+                </div>
+            </div>
+        {%  endfor %}
+    </div>
+            {% endif %}
+        {% if shipped %}
+    <div class="row">
+        <h3>These are the bikes being shipped to you now:</h3>
+    </div>
+    <div class="row">
+        {%  for preorder in shipped %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
+                    <h5>{{ preorder.order }}</h5>
+                    <p>{{ preorder.order.price }}</p>
+                        <img src="{ preorder.order.picture }}">
+                    <p>status: {{ preorder.status }}</p>
+                </a>
+                </div>
+            </div>
+        {%  endfor %}
+    </div>
+        {% endif %}
+    {% else %}
+        <h3>No bikes are ready to ship yet! <a href="{% url 'bikes:ready' %}">check out reserved bikes!</a></h3>
+    {% endif %}
+{% endblock %}

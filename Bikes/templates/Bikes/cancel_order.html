@@ -3,6 +3,7 @@
 {% block title %}Cancel Order {% endblock %}
 
 {% block content %}
+    {%  if preorder.status == 'reserved' %}
     <div class="row columns">
         <form action="" method="POST">
             <h5>Are you sure you want to cancel order of {{ bike.name }} for {{ bike.price }}</h5>
@@ -10,4 +11,7 @@
             <input type="submit" class="button">
         </form>
     </div>
+    {% else %}
+        <h3 class="row">Sorry {{ bike.name }} is allready charged for and will be shipped to you shortly!</h3>
+    {% endif %}
 {% endblock %}

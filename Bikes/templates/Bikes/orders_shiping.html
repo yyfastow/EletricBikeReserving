@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}ADMIN Orders ready to ship {% endblock %}
+
+{% block content %}
+    <h3>These items are ready to be shipped! ship them and mark as shipped</h3>
+    <div class="row">
+    {{ block.super }}
+        {%  for preorder in preorders %}
+            <div class="small-6 columns">
+                <div class="callout">
+                    <img src="{{ preorder.order.picture }}">
+                    <h5>{{ preorder.order.name }}</h5>
+                    <p>{{ preorder.order.type }}</p>
+                    <p>{{ preorder.order.price }}</p>
+                    <h5>{{ preorder.user_info.name }}</h5>
+                    <ul>
+                        <li>Email: {{ preorder.user_info.email }}</li>
+                        <li>Phone: {{ preorder.user_info.phone }}</li>
+                        <li>Billing Address: {{ preorder.user_info.address }} {{ preorder.user_info.city }} {{ preorder.user_info.state }} {{ preorder.user_info.zip }}</li>
+                        <li>Credit Card Number: {{ preorder.user_info.number }}</li>
+                        <li>    Expiration: {{ preorder.user_info.expiration }}</li>
+                        <li>    CCV number: {{ preorder.user_info.ccv_number }}</li>
+                        <li><a href="{% url 'bikes:users_orders' pk=preorder.user_info.pk %}">See Costomer account</a></li>
+                    </ul>
+                    <a href="{% url 'bikes:shipped' pk=preorder.pk %}" class="button">Mark as Shipped!</a>
+                </div>
+            </div>
+        {%  endfor %}
+    {% if shipped %}
+    <h3>These items are marked as shipped</h3>
+    {%  for preorder in shipped %}
+        <div class="small-6 columns">
+            <div class="callout">
+                <h5>{{ preorder.order }}</h5>
+                <img src="{ preorder.order.picture }}">
+                <p>{{ preorder.user_info.name }}</p>
+                <p>{{ preorder.user_info.address}} {{ preorder.user_info.city }} {{ preorder.user_info.state }} {{ preorder.user_info.state }} {{ preorder.user_info.zip }}</p>
+                <a href="{% url 'bikes:recieved' pk=preorder.pk %}" class="button">Mark as Recieved!</a>
+            </div>
+        </div>
+    {%  endfor %}
+    {% endif %}
+    </div>
+{% endblock %}

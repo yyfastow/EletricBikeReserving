@@ -40,8 +40,21 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'localflavor',
     'moneyed',
+    # 'django_messages',
     'Bikes',
 ]
+
+DELETE_MESSAGE = 50
+
+MESSAGE_TAGS = {
+    DELETE_MESSAGE: 'deleted',
+}
+
+TEMPLATE_CONTEXT_PROCESSORS = {
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.request',
+    'django.contrib.messages.context_processors.messages',
+}
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
