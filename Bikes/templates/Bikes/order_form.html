@@ -9,14 +9,21 @@
         <img src="{{ bike.picture }}">
         <p>{{ bike.price }}</p>
         <p>{{ bike.description }}</p>
-        <p><a href="{% url 'bikes:type' %}">Edit order</a></p>
+        <p>Allready have an account: <a href="{% url 'bikes:login' %}">Login and order another</a></p>
     </div>
     <div class="row columns">
         <h3>Fill out this form to order an bike!</h3>
         <form action="" method="POST">
+            <h4>Personal Info</h4>
             {{ form.as_p }}
             {% csrf_token %}
             {{ password.as_p }}
+            {% csrf_token %}
+            <h4>Billing Address</h4>
+            {{ billing.as_p }}
+            {% csrf_token %}
+            <h4>Credit Card Info</h4>
+            {{ card.as_p }}
             {% csrf_token %}
             <input type="submit" class="button">
         </form>

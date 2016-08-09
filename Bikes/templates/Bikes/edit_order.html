@@ -10,5 +10,12 @@
             {% csrf_token %}
             <input type="submit" class="button">
         </form>
+            <h3>Addresses to delever to</h3>
+            {% for bill in billings %}
+                <a href="{% url 'bikes:edit_address' pk=bill.pk %}" class="button">{{ bill.address }} {{ bill.city }} {{ bill.state }} {{ bill.zip }}</a>
+            {% endfor %}
+            <h3>Credit cards</h3>
+            <a href="{% url 'bikes:edit_cards' %}" class="button">Edit cards</a>
+
     </div>
 {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block title %} edit a {{ form }}{% endblock %}
+
+{% block content %}
+    <div class="row columns">
+        <h3>Fill out this form to add/edit</h3>
+        <form action="" method="POST">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" class="button">
+        </form>
+{% endblock %}

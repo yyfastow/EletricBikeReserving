@@ -1,12 +1,15 @@
 from datetime import datetime
 
 from django import forms
+from django.contrib.auth.models import User
 
 from Bikes import models
 
 # TODO: use stripe to charge, need to make account with them
 # I wont do this unless this site really becomes something that charged people
 # for I cant play around with credit charges.
+
+
 def get_cc_type(number):
     """
     Gets credit card type given number. Based on values from Wikipedia page/
@@ -53,23 +56,20 @@ class PasswordForm(forms.Form):
                 "You need to enter the same password in password and Verity Password Fields"
             )
 
+        if User.objects.filter(password=password).exists():
+            raise forms.ValidationError(
+                "This name is allready used by another costomer"
+            )
+
 
 class OrderForm(forms.ModelForm):
-    ccv_number = forms.IntegerField(widget=forms.TextInput(attrs={'size': '4'}))
 
     class Meta:
         model = models.Order
         fields = [
             'name',
             'phone',
-            'state',
-            'city',
-            'address',
-            'zip',
-            'number',
-            'expiration',
-            'ccv_number',
-            'email',
+            'email'
         ]
 
     verify_email = forms.EmailField(max_length=254, label="Please verify your email address")
@@ -85,18 +85,41 @@ class OrderForm(forms.ModelForm):
         verify = cleaned_data.get('verify_email')
         email = cleaned_data.get('email')
         phone = cleaned_data.get('phone')
-        state = cleaned_data.get('state')
-        city = cleaned_data.get('city')
-        address = cleaned_data.get('address')
-        zip = cleaned_data.get('zip')
-        number = cleaned_data.get('number')
-        expiration = cleaned_data.get('expiration')
-        ccv_number = cleaned_data.get('ccv_number')
 
         if email != verify:
             raise forms.ValidationError(
                 "You need to enter the same email in both fields"
             )
+
+
+class BillingForm(forms.ModelForm):
+    class Meta:
+        model = models.Billing
+        fields = ['state', 'city', 'address', 'zip']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        state = cleaned_data.get('state')
+        city = cleaned_data.get('city')
+        address = cleaned_data.get('address')
+        zip = cleaned_data.get('zip')
+
+
+class CardForm(forms.ModelForm):
+    ccv_number = forms.IntegerField(widget=forms.TextInput(attrs={'size': '4'}))
+
+    class Meta:
+        model = models.Card
+        fields = ['number',
+            'expiration',
+            'ccv_number',
+            ]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        number = cleaned_data.get('number')
+        expiration = cleaned_data.get('expiration')
+        ccv_number = cleaned_data.get('ccv_number')
 
         if expiration == datetime.now():
             raise forms.ValidationError(
@@ -116,6 +139,19 @@ class OrderForm(forms.ModelForm):
                 "Make sure to add your ccv number no more then 4 digits!"
             )
 
+class SelectionForm(forms.Form):
+    card = forms.ModelChoiceField(queryset=models.Card.objects.all(),
+                                    empty_label=None)
+    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all(),
+                                    # widget=forms.RadioSelect(),
+                                    empty_label=None)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        card = cleaned_data.get('card')
+        billing = cleaned_data.get('billing')
+
+
 
 class LoginForm(forms.Form):
     name = forms.CharField(max_length=100, label="name  ")
@@ -132,3 +168,38 @@ class LoginForm(forms.Form):
         name = cleaned_data.get('name')
         email = cleaned_data.get('email')
         password = cleaned_data.get('password')
+
+
+BillingFormSet = forms.modelformset_factory(
+    models.Billing,
+    form=BillingForm,
+    extra=1
+)
+
+CardFormSet = forms.modelformset_factory(
+    models.Card,
+    form=CardForm,
+    extra=0,
+)
+
+BillingInlineFormSet = forms.inlineformset_factory(
+    models.Order,
+    models.Billing,
+    extra=0,
+    fields=('state', 'city', 'address', 'zip'),
+    formset=BillingFormSet,
+)
+
+CardInlineFormSet = forms.inlineformset_factory(
+    models.Order,
+    models.Card,
+    extra=1,
+    fields=('number', 'expiration', 'ccv_number',),
+    formset=CardFormSet,
+)
+
+"""def clean(self):
+        cleaned_data = super().clean()
+        billings = cleaned_data.get('billings')
+        cards = cleaned_data.get('cards')
+"""

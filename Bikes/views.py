@@ -53,22 +53,76 @@ def users_orders(request):
 
 @login_required
 def users_orders_ready(request):
-    """show all orders from current user"""
+    """show all orders from current user that are ready for shipping"""
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
     shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
     shipped = models.Preorders.objects.filter(user_info=order, status="shipped")
     return render(request, 'bikes/orders_ready.html', {'user': user, 'order': order, 'shipping': shipping, 'shipped': shipped})
 
+
 @login_required
 def order_details(request, pk):
+    """detailed order"""
     user = request.user
     order = get_object_or_404(models.Preorders, pk=pk)
+    billing = models.Billing.objects.get(address=order.address)
     if order.user_info.email != user.email:
         return users_orders(request)
     return render(request,
                   'bikes/order_details.html',
-                  {'user': user, 'order': order})
+                  {'user': user, 'order': order, 'billing': billing})
+
+
+@login_required()
+def edit_address(request, pk):
+    """edits address of posidic order"""
+    user = request.user
+    order = get_object_or_404(models.Billing, pk=pk)
+    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
+    form = forms.BillingForm(instance=order)
+    if request.method == "POST":
+        form = forms.BillingForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "address edited!")
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+@login_required()
+def edit_card(request, pk):
+    """edits card for order """
+    user = request.user
+    order = models.Preorders.objects.get(pk=pk)
+    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
+    form = forms.CardForm(instance=order.payment)
+    if request.method == "POST":
+        form = forms.CardForm(request.POST, instance=order.payment)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "Credit card edited!")
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+@login_required()
+def edit_cards(request):
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    card = models.Card.objects.filter(user_info=order)
+    form = forms.CardFormSet(queryset=card)
+    if request.method == 'POST':
+        form = forms.CardFormSet(request.POST, queryset=card)
+        if form.is_valid():
+            cards = form.save(commit=False)
+            for card in cards:
+                card.user_info = order
+                card.save()
+            messages.success(request, "updated Credit card infomation!")
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/edit_cards.html', {'credit_cards': form})
+
 
 
 @login_required
@@ -77,17 +131,56 @@ def edit_order(request):
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
     form = forms.OrderForm(instance=order)
+    billing = models.Billing.objects.filter(user_info=order)
+    # billing_form = forms.BillingInlineFormSet(queryset=billing)
+
+    # card_form = forms.CardInlineFormSet(queryset=card)
+    #info_form = forms.EditInfo(billing, card)
     if request.method == 'POST':
         form = forms.OrderForm(request.POST, instance=order,)
-        if form.is_valid():
+        # billing_form = forms.BillingInlineFormSet(request.POST, queryset=billing)
+        # card_form = forms.CardInlineFormSet(request.POST, queryset=card)
+        # info_form = forms.EditInfo(request.POST, billing, card)
+        # nuzz = billing_form + card_form
+        if form.is_valid() and email_name_unique(request,
+                form.cleaned_data['name'], form.cleaned_data['email'], user):
             form.save()
             user.username = form.cleaned_data['name']
             user.email = form.cleaned_data['email']
             user.save()
+            """messages.success(request, "Billing form checked out!")
+            bills = billing_form.save(commit=False)
+            for bill in bills:
+                    bill.user_info = form
+                    bill.save()
+            cards = card_form.save(commit=False)
+            for card in cards:
+                card.user_info = form
+                card.save()"""
             messages.success(request, "updated Order!")
             # TODO: login automatically
-            return HttpResponseRedirect(reverse('bikes:login'))
-    return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form})
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/edit_order.html', {'user': user,
+                                                     'order': order,
+                                                     'form': form,
+                                                     'billings': billing,
+                                                     })
+
+
+def email_name_unique(request, name, email, user=None):
+    """makes sure email and password is unique"""
+    users_email = User.objects.filter(email=email)
+    users_name = User.objects.filter(username=name)
+    if users_email and user not in users_email:
+        messages.success(request, "This email is allready used by another user")
+        return False
+    elif users_name and user not in users_name:
+        messages.success(request,
+            "This name is allready used by another costomer"
+        )
+        return False
+    else:
+        return True
 
 
 @login_required()
@@ -124,15 +217,15 @@ def cancel_order(request, pk):
     return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
 
 
-
-"""try:
-    existing_user = User.objects.get(username=cleaned_data.get('username'))
-    error_msg = u'Username already exists.'
-    self._errors['username'] = self.error_class([error_msg])
-    del cleaned_data['username']
-    return cleaned_data
-except User.DoesNotExist:
-    return cleaned_data"""
+"""def unique(cleaned_data):
+    try:
+        existing_user = User.objects.get(username=cleaned_data.get('username'))
+        error_msg = u'Username already exists.'
+        self._errors['username'] = self.error_class([error_msg])
+        del cleaned_data['username']
+        return cleaned_data
+    except User.DoesNotExist:
+        return cleaned_data"""
 
 
 # Ordering bikes
@@ -141,14 +234,30 @@ def order_bike(request, types_pk, bike_pk):
     bike = get_object_or_404(models.Bikes, pk=bike_pk)
     form = forms.OrderForm()
     password = forms.PasswordForm()
+    billing = forms.BillingForm()
+    card = forms.CardForm()
     if request.method == "POST":
         form = forms.OrderForm(request.POST)
         password = forms.PasswordForm(request.POST)
-        if form.is_valid() and password.is_valid():
+        billing = forms.BillingForm(request.POST)
+        card = forms.CardForm(request.POST)
+        if form.is_valid() and password.is_valid() and billing.is_valid() and card.is_valid() and  email_name_unique(
+                request, form.cleaned_data['name'], form.cleaned_data['email']):
             order = form.save(commit=False)
             order.total_charge = bike.price
             order.save()
-            Preorders.objects.create(user_info=order, order=bike)
+            addr = billing.save(commit=False)
+            addr.user_info = order
+            addr.save()
+            payment = card.save(commit=False)
+            payment.user_info =  order
+            payment.save()
+
+
+            Preorders.objects.create(user_info=order,
+                                     address=addr,
+                                     payment=payment,
+                                     order=bike)
             bike.orders += 1
             bike.save()
             user = User.objects.create_user(
@@ -157,17 +266,20 @@ def order_bike(request, types_pk, bike_pk):
                 password.cleaned_data['password']
             )
             if bike.orders >= bike.orders_needed:
-                anought_orders(request, bike)
+                # anought_orders(request, bike)
+                pass
             else:
                 messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             return HttpResponseRedirect(reverse('bikes:login'))
-    return render(request, 'bikes/order_form.html', {'form': form, 'bike': bike, 'password': password})
+    return render(request, 'bikes/order_form.html', {'form': form, 'billing': billing, 'card': card, 'bike': bike, 'password': password})
 
 
 def anought_orders(request, bike):
     earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
     for early in earlier_orders:
         user_in = early.user_info
+        billing = early.billing
+        card = early.card
         early.status = "shipping"
         early.save()
         send_mail(
@@ -179,8 +291,8 @@ def anought_orders(request, bike):
             Credit Card Number: {}
             expiration: {}
             CCV number: {}
-            """.format(bike.name, user_in.name, user_in.phone, user_in.address, user_in.city,
-                user_in.state, user_in.zip, user_in.number, user_in.expiration, user_in.ccv_number),
+            """.format(bike.name, user_in.name, user_in.phone, billing.address, billing.city,
+                billing.state, billing.zip, card.number, card.expiration, card.ccv_number),
             '{} <{}>'.format(user_in.name, user_in.email),
             ['yoseffastow@gmail.com'],
         )
@@ -196,20 +308,69 @@ def anought_orders(request, bike):
 def order_another_bike(request, types_pk, bike_pk):
     """adds another order"""
     bike = get_object_or_404(models.Bikes, pk=bike_pk)
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    form = forms.SelectionForm()
+    form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+    form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
     if request.method == "POST":
-        user = request.user
-        order = models.Order.objects.get(name=user.username, email=user.email)
-        order.total_charge += bike.price
-        order.save()
-        bike.orders += 1
-        bike.save()
-        Preorders.objects.create(user_info=order, order=bike)
-        if bike.orders >= bike.orders_needed:
-            anought_orders(request, bike)
-        else:
-            messages.add_message(request, messages.SUCCESS, "Your order is sent!")
-        return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/confirm_order.html', {'bike': bike})
+        form = forms.SelectionForm(request.POST)
+        form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+        form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+        if form.is_valid():
+            order.total_charge += bike.price
+            order.save()
+            Preorders.objects.create(user_info=order,
+                                     address=form.cleaned_data['billing'],
+                                     payment=form.cleaned_data['card'],
+                                     order=bike)
+            bike.orders += 1
+            bike.save()
+            if bike.orders >= bike.orders_needed:
+                # anought_orders(request, bike)
+                messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
+                    form.cleaned_data['billing'],
+                ))
+            else:
+                messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
+                    form.cleaned_data['billing'],
+                ))
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/confirm_order.html', {'user': user,'bike': bike, 'form': form})
+
+
+@login_required()
+def add_address(request):
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
+    form = forms.BillingForm()
+    if request.method == "POST":
+        form = forms.BillingForm(request.POST)
+        if form.is_valid():
+            billing = form.save(commit=False)
+            billing.user_info = order
+            billing.save()
+            messages.add_message(request, messages.SUCCESS, "address added!")
+            return HttpResponseRedirect(reverse('bikes:type'))
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+@login_required()
+def add_card(request):
+    user = request.user
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
+    form = forms.CardForm()
+    if request.method == "POST":
+        form = forms.CardForm(request.POST)
+        if form.is_valid():
+            billing = form.save(commit=False)
+            billing.user_info = order
+            billing.save()
+            messages.add_message(request, messages.SUCCESS, "Credit card added!")
+            return HttpResponseRedirect(reverse('bikes:type'))
+    return render(request, 'bikes/add.html', {'form': form})
 
 
 # Loggin in and out

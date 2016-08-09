@@ -12,10 +12,10 @@
 
                         <li>Email: {{ order.user_info.email }}</li>
                         <li>Phone: {{ order.user_info.phone }}</li>
-                        <li>Billing Address: {{ order.user_info.address }} {{ order.city }} {{ order.state }} {{ order.zip }}</li>
-                        <li>Credit Card Number: {{ order.user_info.number }}</li>
-                        <li>    Expiration: {{ order.user_info.expiration }}</li>
-                        <li>    CCV number: {{ order.user_info.ccv_number }}</li>
+                        <li>Billing Address: {{ order.address}} {{ order.address.city }} {{ order.address.state }} {{ order.address.zip }}</li>
+                        <li>Credit Card Number: {{ order.payment.number }}</li>
+                        <li>    Expiration: {{ order.payment.expiration }}</li>
+                        <li>    CCV number: {{ order.payment.ccv_number }}</li>
                         <li><a href="{% url 'bikes:users_orders' pk=order.user_info.pk %}">See Costomer account</a></li>
                     </ul>
                 </div>

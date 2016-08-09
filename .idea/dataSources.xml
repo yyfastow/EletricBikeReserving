@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="DataSourceManagerImpl" format="xml" hash="3360582467">
+  <component name="DataSourceManagerImpl" format="xml" hash="1291908644">
     <data-source source="LOCAL" name="HSQLDB (Local) - jdbc:hsqldb:file:C:/Users/yosef/PycharmProjects/EletricBikeReserving/db.mangodb/" uuid="4b6eba13-72eb-4001-853d-7f97f9a14655">
       <driver-ref>hsqldb.local</driver-ref>
       <synchronize>true</synchronize>
       <configured-by-url>true</configured-by-url>
       <jdbc-driver>org.hsqldb.jdbc.JDBCDriver</jdbc-driver>
       <jdbc-url>jdbc:hsqldb:file:$PROJECT_DIR$/db.mangodb/</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="Django default" uuid="2cbe3473-6a23-41ff-8b74-aae5e1662a59">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <remarks>$PROJECT_DIR$/EletricBikeReserving/settings.py</remarks>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:C:\Users\yosef\PycharmProjects\EletricBikeReserving\db.sqlite3</jdbc-url>
+      <explain-plan-config>
+        <provider>com.intellij.database.plan.ExplainPlanProvider.NullExplainPlanProvider</provider>
+      </explain-plan-config>
     </data-source>
   </component>
 </project>

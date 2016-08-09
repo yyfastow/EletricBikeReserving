@@ -3,4 +3,7 @@
   <data-source name="HSQLDB (Local) - jdbc:hsqldb:file:C:/Users/yosef/PycharmProjects/EletricBikeReserving/db.mangodb/" uuid="4b6eba13-72eb-4001-853d-7f97f9a14655">
     <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
   </data-source>
+  <data-source name="Django default" uuid="2cbe3473-6a23-41ff-8b74-aae5e1662a59">
+    <database-info product="" version="" jdbc-version="" driver-name="" driver-version=""/>
+  </data-source>
 </component>

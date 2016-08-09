@@ -6,6 +6,12 @@
     <div class="row columns">
         <form action="" method="POST">
             <h5>Are you sure you want to order {{ bike.name }} for {{ bike.price }}</h5>
+            <p>where to ship</p>
+            {{ form.billing }}
+            <a href="{% url 'bikes:add_address'%}" class="button">Add another address</a>
+            <p>Credit Card</p>
+            {{ form.card }}
+            <a href="{% url 'bikes:add_card'%}" class="button">Add another card</a>
             {% csrf_token %}
             <input type="submit" class="button">
         </form>

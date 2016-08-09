@@ -16,10 +16,15 @@ urlpatterns = [
 
     url(r'user/$', views.users_orders, name='user'),
     url(r'user/ready/$', views.users_orders_ready, name='ready'),
+    url(r'user/edit address/(?P<pk>\d+)/$', views.edit_address, name='edit_address'),
+    url(r'user/edit card/(?P<pk>\d+)/$', views.edit_card, name='edit_card'),
+    url(r'user/edit cards/$', views.edit_cards, name='edit_cards'),
     url(r'user/(?P<pk>\d+)/$', views.order_details, name='order_detail'),
     url(r'user/edit/$', views.edit_order, name='edit'),
     url(r'user/change password/$', views.change_password, name='change_password'),
     url(r'user/(?P<pk>\d+)/cancel order/$', views.cancel_order, name='cancel'),
+    url(r'user/add address/$', views.add_address, name="add_address"),
+    url(r'user/add card/$', views.add_card, name="add_card"),
 
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/$', views.bike_details, name='details'),
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/order/$', views.order_bike, name='order'),

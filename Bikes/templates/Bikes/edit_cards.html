@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}Edit Credit card info {%  endblock %}
+
+{% block content %}
+    <div class="row columns">
+        <h3>edit credit cards</h3>
+        <form action="" method="POST">
+            {% csrf_token  %}
+            <section>
+                {{ credit_cards }}
+            </section>
+            <input type="submit" class="button" value="Save">
+        </form>
+    </div>
+{% endblock %}

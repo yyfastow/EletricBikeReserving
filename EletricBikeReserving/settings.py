@@ -44,15 +44,10 @@ INSTALLED_APPS = [
     'Bikes',
 ]
 
-DELETE_MESSAGE = 50
-
-MESSAGE_TAGS = {
-    DELETE_MESSAGE: 'deleted',
-}
 
 TEMPLATE_CONTEXT_PROCESSORS = {
     'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.request',
+#    'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
 }
 
@@ -135,12 +130,23 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
+PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
+SITE_ROOT = PROJECT_ROOT
 
+# MEDIA_ROOT = 'C:/Users/yosef/PycharmProjects/EletricBikeReserving/Bikes/media',
+# MEDIA_URL = '/media/'
+
+# STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
+   os.path.join(SITE_ROOT, 'staticfiles'),
 )
+
+# TEMPLATE_DIRS = (
+  #  os.path.join(SITE_ROOT, 'templates'),
+# )
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'orders')

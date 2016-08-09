@@ -16,7 +16,12 @@
                 <div class="callout">
                     <h5>{{ preorder.order }}</h5>
                     <p>{{ preorder.order.price }}</p>
-                    <img src="{ preorder.order.picture }}">
+                    <img src="{{ preorder.order.picture }}">
+                    <p>Ship to: {{ preorder.address }} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</p>
+                    <h5>Credit card info</h5>
+                    <p>Credit card number: {{ preorder.payment.number }}</p>
+                    <p>Expires: {{ preorder.payment.expiration }}</p>
+                    <p>CCV: {{ preorder.payment.ccv_number }}</p>
                 </div>
             </div>
         {%  endfor %}
