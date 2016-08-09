@@ -266,7 +266,7 @@ def order_bike(request, types_pk, bike_pk):
                 password.cleaned_data['password']
             )
             if bike.orders >= bike.orders_needed:
-                # anought_orders(request, bike)
+                anought_orders(request, bike)
                 pass
             else:
                 messages.add_message(request, messages.SUCCESS, "Your order is sent!")
@@ -278,8 +278,8 @@ def anought_orders(request, bike):
     earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
     for early in earlier_orders:
         user_in = early.user_info
-        billing = early.billing
-        card = early.card
+        billing = early.address
+        card = early.payment
         early.status = "shipping"
         early.save()
         send_mail(
@@ -327,7 +327,7 @@ def order_another_bike(request, types_pk, bike_pk):
             bike.orders += 1
             bike.save()
             if bike.orders >= bike.orders_needed:
-                # anought_orders(request, bike)
+                anought_orders(request, bike)
                 messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
                     form.cleaned_data['billing'],
                 ))
