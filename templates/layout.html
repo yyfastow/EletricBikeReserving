@@ -25,7 +25,7 @@
                     <li class="has-submenu"><a href="{% url 'bikes:shipping' %}">Bikes ready to ship</a></li>
                     <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
                     <li class="has-submenu"><a href="{% url 'home' %}">Messages</a></li>
-                {% elif user.is_authenticated %}
+                {% elif user.is_authenticated %} 
                     <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
                     <li class="has-submenu"><a href="{% url 'home' %}">Message</a></li>
                     <li class="has-submenu"><a href="{% url 'bikes:message' %}">Send us a message</a></li>
