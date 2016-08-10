@@ -43,6 +43,27 @@ def bike_details(request, types_pk, bike_pk):
 
 
 # Users Views
+def message(request):
+    user = request.user
+    order = ""
+    if request.user.is_authenticated():
+        if user.is_superuser:
+            return HttpResponseRedirect(reverse('bikes:all_orders'))
+        order = models.Order.objects.get(name=user.username, email=user.email)
+    else:
+        order = models.Order.objects.get(name="Anonymous")
+    message = forms.MessageForm()
+    if request.method == "POST":
+        message = forms.MessageForm(request.POST)
+        if message.is_valid():
+            form = message.save(commit=False)
+            form.user = order
+            form.owner = "to"
+            form.save()
+            return HttpResponseRedirect(reverse('home'))
+    return render(request, 'bikes/admin_messages.html', {'message': message})
+
+
 @login_required
 def users_orders(request):
     """show all orders from current user"""

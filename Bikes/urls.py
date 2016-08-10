@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^$', views.bike_type_list, name='type'),
     url(r'login/$', views.loginer, name='login'),
     url(r'logout/$', views.logout_view, name='logout'),
+    url(r'message/$', views.message, name="message"),
 
     url(r'superuser/$', views.admin_orders, name="all_orders"),
     url(r'superuser/message/(?P<pk>\d+)/$', views.admin_send_message, name='admin_message'),

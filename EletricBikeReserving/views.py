@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
-from Bikes import models
+from Bikes import models, forms
 
 
 def home(request):
@@ -11,10 +11,10 @@ def home(request):
     if request.user.is_authenticated():
         user = request.user
         if user.is_superuser:
-            messages = models.Order.objects.all()
+            messages = models.Message.objects.filter(owner="to")
         else:
             order = models.Order.objects.get(name=user.username, email=user.email)
-            messages = models.Message.objects.filter(user=order)
+            messages = models.Message.objects.filter(user=order, owner="from")
     return render(request, 'home.html', {"messages": messages})
 
 

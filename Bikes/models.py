@@ -105,6 +105,7 @@ class Preorders(models.Model):
 class Message(models.Model):
     user = models.ForeignKey(Order)
     message = models.TextField()
+    owner = models.CharField(max_length=25, default="from")
 
     def __str__(self):
         return "{}".format(self.id)
