@@ -36,9 +36,10 @@ def bike_details(request, types_pk, bike_pk):
     bike = get_object_or_404(models.Bikes,
                              type_id=types_pk,
                              pk=bike_pk)
+    more = bike.orders_needed - bike.orders
     return render(request,
                   'bikes/bikes_details.html',
-                  {'bike': bike})
+                  {'bike': bike, 'more': more})
 
 
 # Users Views
@@ -46,6 +47,8 @@ def bike_details(request, types_pk, bike_pk):
 def users_orders(request):
     """show all orders from current user"""
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     preorders = models.Preorders.objects.filter(user_info=order, status="reserved")
     return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
@@ -53,8 +56,10 @@ def users_orders(request):
 
 @login_required
 def users_orders_ready(request):
-    """show all orders from current user that are ready for shipping"""
+    """ show all orders from current user that are ready for shipping """
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
     shipped = models.Preorders.objects.filter(user_info=order, status="shipped")
@@ -65,6 +70,8 @@ def users_orders_ready(request):
 def order_details(request, pk):
     """detailed order"""
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = get_object_or_404(models.Preorders, pk=pk)
     billing = models.Billing.objects.get(address=order.address)
     if order.user_info.email != user.email:
@@ -78,7 +85,11 @@ def order_details(request, pk):
 def edit_address(request, pk):
     """edits address of posidic order"""
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = get_object_or_404(models.Billing, pk=pk)
+    if order.user_info.email != user.email and order.user_info != user.username:
+        return users_orders(request)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     form = forms.BillingForm(instance=order)
     if request.method == "POST":
@@ -94,7 +105,12 @@ def edit_address(request, pk):
 def edit_card(request, pk):
     """edits card for order """
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Preorders.objects.get(pk=pk)
+
+    if order.user_info.email != user.email and order.user_info != user.username:
+        return users_orders(request)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     form = forms.CardForm(instance=order.payment)
     if request.method == "POST":
@@ -108,6 +124,7 @@ def edit_card(request, pk):
 
 @login_required()
 def edit_cards(request):
+    """ edits all credit cards of user"""
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
     card = models.Card.objects.filter(user_info=order)
@@ -203,8 +220,10 @@ def change_password(request):
 def cancel_order(request, pk):
     """ cancel an order"""
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     preorder = get_object_or_404(models.Preorders, pk=pk)
-    order = models.Order.objects.get(name=preorder.user_info.name)
+    order = models.Order.objects.get(name=user.username, email=user.email)
     bike = models.Bikes.objects.get(name=preorder.order)
     if request.method == 'POST' and preorder.status == 'reserved':
         preorder.delete()
@@ -215,17 +234,6 @@ def cancel_order(request, pk):
         messages.add_message(request, messages.SUCCESS, "canceled order")
         return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
-
-
-"""def unique(cleaned_data):
-    try:
-        existing_user = User.objects.get(username=cleaned_data.get('username'))
-        error_msg = u'Username already exists.'
-        self._errors['username'] = self.error_class([error_msg])
-        del cleaned_data['username']
-        return cleaned_data
-    except User.DoesNotExist:
-        return cleaned_data"""
 
 
 # Ordering bikes
@@ -278,6 +286,7 @@ def anought_orders(request, bike):
     earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
     for early in earlier_orders:
         user_in = early.user_info
+        order = models.Order.objects.get(name=user_in.name, email=user_in.email)
         billing = early.address
         card = early.payment
         early.status = "shipping"
@@ -296,6 +305,15 @@ def anought_orders(request, bike):
             '{} <{}>'.format(user_in.name, user_in.email),
             ['yoseffastow@gmail.com'],
         )
+        carded = "{}".format(card.number)
+        models.Message.objects.create(
+            user=order,
+            message="""Order of bike {} is ready to be send to {} {} {} {}.
+                    We will charge your credit card ****-{} shortly {} price and ship it as soon as possible
+                    We will tell you when. """.format(bike.name, billing.address, billing.city,
+                                                      billing.state, billing.zip, carded[-4:],
+                                                      bike.price)
+        )
         user = models.Order.objects.get(name=early.user_info.name)
         user.total_charge -= bike.price
         user.save()
@@ -309,6 +327,8 @@ def order_another_bike(request, types_pk, bike_pk):
     """adds another order"""
     bike = get_object_or_404(models.Bikes, pk=bike_pk)
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     form = forms.SelectionForm()
     form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
@@ -342,6 +362,8 @@ def order_another_bike(request, types_pk, bike_pk):
 @login_required()
 def add_address(request):
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     form = forms.BillingForm()
@@ -359,6 +381,8 @@ def add_address(request):
 @login_required()
 def add_card(request):
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     form = forms.CardForm()
@@ -438,11 +462,33 @@ def orders_ready_to_ship(request):
 
 
 @user_passes_test(lambda user: user.is_superuser)
+def admin_send_message(request, pk):
+    order = get_object_or_404(models.Order, pk=pk)
+    message = forms.MessageForm()
+    if request.method == "POST":
+        message = forms.MessageForm(request.POST)
+        if message.is_valid():
+            form = message.save(commit=False)
+            form.user = order
+            form.save()
+            messages.add_message(request, messages.SUCCESS, "message sent!")
+            return HttpResponseRedirect(reverse('bikes:all_orders'))
+    return render(request, 'bikes/admin_messages.html', {'message': message, 'order': order})
+
+
+@user_passes_test(lambda user: user.is_superuser)
 def shipping_order(request, pk):
     """ admin confirms that item is sent and marks it as shipped"""
     preorder = models.Preorders.objects.get(pk=pk)
     preorder.status = 'shipped'
     preorder.save()
+    order = models.Order.object.get(name=preorder.user_info.name)
+    models.Message.objects.create(
+        user=order,
+        message="""Your card was charged and {} is being shipped to you it will come to you in the next month
+                    Contact us about.
+                """.format(preorder.order)
+    )
     messages.add_message(request, messages.SUCCESS, "Marked as shipped")
     return HttpResponseRedirect(reverse('bikes:shipping'))
 

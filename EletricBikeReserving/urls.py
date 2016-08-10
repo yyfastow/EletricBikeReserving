@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     # url(r'^messages/', include('django_messages.urls')),
     url(r'^$', views.home, name='home'),
+    url(r'^delete/(?P<pk>\d+)/$', views.delete_message, name="delete"),
     url(r'^bikes/', include('Bikes.urls', namespace='bikes'))
 ]
 

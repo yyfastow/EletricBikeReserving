@@ -8,7 +8,10 @@
         <form action="" method="POST">
             {% csrf_token  %}
             <section>
-                {{ credit_cards }}
+                {% for card in credit_cards %}
+                    <p>card {{ num }}</p>
+                    {{ card }}
+                {% endfor %}
             </section>
             <input type="submit" class="button" value="Save">
         </form>

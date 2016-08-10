@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'logout/$', views.logout_view, name='logout'),
 
     url(r'superuser/$', views.admin_orders, name="all_orders"),
+    url(r'superuser/message/(?P<pk>\d+)/$', views.admin_send_message, name='admin_message'),
     url(r'superuser/ready to ship/$', views.orders_ready_to_ship, name="shipping"),
     url(r'superuser/ready to ship/(?P<pk>\d+)/$', views.shipping_order, name="shipped"),
     url(r'superuser/recieved/(?P<pk>\d+)/$', views.recieved_order, name="recieved"),

@@ -100,3 +100,11 @@ class Preorders(models.Model):
 
     def __str__(self):
         return self.order.name
+
+
+class Message(models.Model):
+    user = models.ForeignKey(Order)
+    message = models.TextField()
+
+    def __str__(self):
+        return "{}".format(self.id)

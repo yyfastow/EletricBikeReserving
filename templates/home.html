@@ -10,4 +10,32 @@
     <div class="row">
         <h3>Welcome to the bike shop.Reserve the bike of your choice now!</h3>
     </div>
+    <div class="row">
+
+        {% if user.is_superuser %}
+            <h3>Here are messages sent</h3>
+            {% for message in messages %}
+                <div class="small-6 columns">
+                    <div class="callout">
+                        <h4>Message to {{ message.user.name }}:</h4>
+                        <p>{{ message.message }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            {% if messages %}
+                <h3>Here are your messages</h3>
+            {% else %}
+                <h3>Your message box is empty</h3>
+            {% endif %}
+            {% for message in messages %}
+                <div class="small-6 columns">
+                    <div class="callout">
+                        <p>{{ message.message }}</p>
+                        <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
+                    </div>
+                </div>
+            {%  endfor %}
+    {% endif %}
+    </div>
 {%  endblock %}

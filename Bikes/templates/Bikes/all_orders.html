@@ -13,6 +13,7 @@
                         <li>Phone: {{ order.phone }}</li>
                         <li>total to charge: {{ order.total_charge }}</li>
                         <li><a href="{% url 'bikes:users_orders' pk=order.pk %}">See all Bikes Ordered by {{ order.name }}</a></li>
+                        <li><a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a></li>
                     </ul>
                 </div>
             </div>

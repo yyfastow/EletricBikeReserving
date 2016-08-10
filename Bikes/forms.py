@@ -170,6 +170,13 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password')
 
 
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = models.Message
+        fields = ['message']
+
+
+
 BillingFormSet = forms.modelformset_factory(
     models.Billing,
     form=BillingForm,
