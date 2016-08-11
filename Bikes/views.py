@@ -93,13 +93,41 @@ def order_details(request, pk):
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    order = get_object_or_404(models.Preorders, pk=pk)
-    billing = models.Billing.objects.get(address=order.address)
-    if order.user_info.email != user.email:
-        return users_orders(request)
+    bike = get_object_or_404(models.Bikes, pk=pk)
+    user_profile = models.Order.objects.get(name=user.username, email=user.email)
+    order = models.Preorders.objects.filter(user_info=user_profile, order=bike, status="reserved")
     return render(request,
                   'bikes/order_details.html',
-                  {'user': user, 'order': order, 'billing': billing})
+                  {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': 'shipped'})
+
+
+@login_required
+def ready_order_details(request, pk):
+    """detailed order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    bike = get_object_or_404(models.Bikes, pk=pk)
+    user_profile = models.Order.objects.get(name=user.username, email=user.email)
+    order = models.Preorders.objects.filter(user_info=user_profile, order=bike, status="shipping")
+    return render(request,
+                  'bikes/send_details.html',
+                  {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': "shipping"})
+
+
+
+@login_required
+def sending_order_details(request, pk):
+    """detailed order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    bike = get_object_or_404(models.Bikes, pk=pk)
+    user_profile = models.Order.objects.get(name=user.username, email=user.email)
+    order = models.Preorders.objects.filter(user_info=user_profile, order=bike, status="shipped")
+    return render(request,
+                  'bikes/send_details.html',
+                  {'user': user, 'orders': order, 'bike': bike})
 
 
 @login_required()
@@ -108,13 +136,13 @@ def edit_address(request, pk):
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    order = get_object_or_404(models.Billing, pk=pk)
+    order = models.Preorders.objects.get(pk=pk)
     if order.user_info.email != user.email and order.user_info != user.username:
         return users_orders(request)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.BillingForm(instance=order)
+    form = forms.BillingForm(instance=order.address)
     if request.method == "POST":
-        form = forms.BillingForm(request.POST, instance=order)
+        form = forms.BillingForm(request.POST, instance=order.address)
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, "address edited!")

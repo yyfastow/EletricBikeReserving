@@ -1,14 +1,9 @@
-{% extends "layout.html" %}
+{% extends "bikes/detail_layout.html" %}
 
 {%  block title %}{{ bike.name }}{% endblock %}
 
-{% block content %}
-    <div class="row columns">
-        <h3>{{ bike.name }}</h3>
-        <h5>{{ bike.type }}</h5>
-        <img src="{{ bike.picture }}">
-        <p>{{ bike.price }}</p>
-        <p>{{ bike.description }}</p>
+{% block details %}
+
         {% if bike.orders < bike.orders_needed %}
             <p> Preorders needed to confirm orders: {{ bike.orders_needed }}</p>
             <p> Preorders now:  {{ bike.orders }}</p>

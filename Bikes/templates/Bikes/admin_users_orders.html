@@ -16,7 +16,9 @@
                 <div class="callout">
                     <h5>{{ preorder.order }}</h5>
                     <p>{{ preorder.order.price }}</p>
+
                     <img src="{{ preorder.order.picture }}">
+                    <h4>{{ preorder.status }}</h4>
                     <p>Ship to: {{ preorder.address }} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</p>
                     <h5>Credit card info</h5>
                     <p>Credit card number: {{ preorder.payment.number }}</p>

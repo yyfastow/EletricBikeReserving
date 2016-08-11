@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="row columns">
+        <h3>{{ bike.name }}</h3>
+        <h5>{{ bike.type }}</h5>
+        <img src="{{ bike.picture }}">
+        <p>{{ bike.price }}</p>
+        <p>{{ bike.description }}</p>
+        {% block details %}{% endblock %}
+    </div>
+    {% block orders %}{% endblock %}
+{% endblock %}

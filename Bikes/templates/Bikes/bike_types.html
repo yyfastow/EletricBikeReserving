@@ -1,16 +1,20 @@
 {%  extends "layout.html" %}
+{% load bikes_extras %}
 
 {%  block title %}{{ bike_type.type }} Bikes{% endblock %}
 
 {%  block content %}
     <div class="row">
         {% for bike_type in bike_types %}
+            {% bikes_available bike_type as bike %}
+            {% if bike %}
             <div class="small-6 columns">
                 <div class="callout">
                     <img src="{{ bike_type.picture }}">
                     <h5><a href="{%  url 'bikes:list'  pk=bike_type.pk%}">{{ bike_type.type }}</a></h5>
                 </div>
             </div>
+            {% endif %}
         {%  endfor %}
     </div>
 {%  endblock  %}

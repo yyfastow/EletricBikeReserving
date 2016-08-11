@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
 
+{% load bikes_extras %}
+
 {% block title %}{{ user.username }} orders{% endblock %}
 
 {% block submenu %}
     <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
     <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
-    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
 {% endblock %}
 
 {% block content %}
@@ -18,14 +19,16 @@
         {% endif %}
     </div>
     <div class="row">
-        {%  for preorder in preorders %}
+        {% orders_by_bike preorders as bike_orders %}
+        {%  for preorder in bike_orders %}
             <div class="small-6 columns">
                 <div class="callout">
                     <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
-                    <h5>{{ preorder.order }}</h5>
-                    <p>{{ preorder.order.price }}</p>
-                    <img src="{ preorder.order.picture }}">
-                    <h6><a href="{%  url 'bikes:cancel' pk=preorder.pk %}">Cancel Order</a></h6>
+                    <h5>{{ preorder }}</h5>
+                    <p>{{ preorder.price }}</p>
+                    <img src="{ preorder.picture }}" />
+                        {% order_per_bike preorder order "reserved" as amount %}
+                        <p>Amount ordered: {{ amount }}</p>
                 </a>
                 </div>
             </div>

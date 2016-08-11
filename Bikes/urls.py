@@ -18,6 +18,8 @@ urlpatterns = [
 
     url(r'user/$', views.users_orders, name='user'),
     url(r'user/ready/$', views.users_orders_ready, name='ready'),
+    url(r'user/ready/(?P<pk>\d+)/$', views.ready_order_details, name='shipping'),
+    url(r'user/shipped/(?P<pk>\d+)/$', views.sending_order_details, name='shipped'),
     url(r'user/edit address/(?P<pk>\d+)/$', views.edit_address, name='edit_address'),
     url(r'user/edit card/(?P<pk>\d+)/$', views.edit_card, name='edit_card'),
     url(r'user/edit cards/$', views.edit_cards, name='edit_cards'),

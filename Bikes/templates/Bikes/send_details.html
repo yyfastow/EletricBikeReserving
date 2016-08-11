@@ -1,0 +1,18 @@
+{% extends "bikes/detail_layout.html" %}
+
+{% load bikes_extras %}
+
+{% block title %}{{ bike }}{% endblock %}
+
+{% block orders %}
+    {%  orders_by_address orders as billing_orders %}
+    {% for order in billing_orders %}
+        <div class="small-6 columns">
+            <div class="callout">
+                {% order_per_address order users status as amount %}
+                <h3>Shipping {{ amount }} {{ bike.type}} bikes to:</h3>
+                <h5>{{ order.address }} {{ order.city }} {{ order.state }} {{ order.zip }}</h5>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

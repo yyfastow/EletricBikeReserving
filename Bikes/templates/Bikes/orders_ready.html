@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 
+{%  load bikes_extras %}
+
 {% block title %}{{ user.username }} orders{% endblock %}
 
 {% block submenu %}
@@ -14,14 +16,17 @@
         {% if shipping %}
         <h3>These are the bikes ready to ship:</h3>
     <div class="row">
-        {%  for preorder in shipping %}
+        {% orders_by_bike shipping as bike_orders %}
+        {%  for preorder in bike_orders %}
             <div class="small-6 columns">
                 <div class="callout">
-                    <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
-                    <h5>{{ preorder.order }}</h5>
-                    <p>{{ preorder.order.price }}</p>
-                    <img src="{ preorder.order.picture }}">
-                    <p>status: {{ preorder.status }}</p>
+                    <a href="{% url 'bikes:shipping' pk=preorder.pk %}">
+                    <h5>{{ preorder }}</h5>
+                    <p>{{ preorder.price }}</p>
+                    <img src="{ preorder.picture }}">
+                    {% order_per_bike preorder order "shipping" as amount %}
+                    <p>Amount ordered: {{ amount }}</p>
+                    <p>status: shipping</p>
                 </a>
                 </div>
             </div>
@@ -33,14 +38,17 @@
         <h3>These are the bikes being shipped to you now:</h3>
     </div>
     <div class="row">
-        {%  for preorder in shipped %}
+        {% orders_by_bike shipped as bike_orders %}
+        {%  for preorder in bike_orders %}
             <div class="small-6 columns">
                 <div class="callout">
-                    <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
-                    <h5>{{ preorder.order }}</h5>
-                    <p>{{ preorder.order.price }}</p>
-                        <img src="{ preorder.order.picture }}">
-                    <p>status: {{ preorder.status }}</p>
+                    <a href="{% url 'bikes:shipped' pk=preorder.pk %}">
+                    <h5>{{ preorder }}</h5>
+                    <p>{{ preorder.price }}</p>
+                        <img src="{ preorder.picture }}">
+                    {% order_per_bike preorder order "shipped" as amount %}
+                    <p>Amount ordered: {{ amount }}</p>
+                    <p>status: shipped</p>
                 </a>
                 </div>
             </div>
