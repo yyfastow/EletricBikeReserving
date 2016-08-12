@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="row columns">
-        <h3>Fill out this form to add/edit</h3>
+        <h3>{% if not form.instance.pk %}Add{% else %}Edit {% endif %}</h3>
         <form action="" method="POST">
             {{ form.as_p }}
             {% csrf_token %}

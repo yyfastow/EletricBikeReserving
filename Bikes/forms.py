@@ -152,6 +152,23 @@ class SelectionForm(forms.Form):
         billing = cleaned_data.get('billing')
 
 
+class BillSelectionForm(forms.Form):
+    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all(),
+                                     empty_label=None)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        billing = cleaned_data.get('billing')
+
+
+class CardSelectionForm(forms.Form):
+    card = forms.ModelChoiceField(queryset=models.Card.objects.all(),
+                                    empty_label=None)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        card = cleaned_data.get('card')
+
 
 class LoginForm(forms.Form):
     name = forms.CharField(max_length=100, label="name  ")

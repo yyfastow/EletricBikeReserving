@@ -151,6 +151,30 @@ def edit_address(request, pk):
 
 
 @login_required()
+def change_address(request, pk):
+    """changes the card on a order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    order = models.Order.objects.filter(name=user.username, email=user.email)
+    form = forms.BillSelectionForm()
+    form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+    if request.method == "POST":
+        form = forms.BillSelectionForm(request.POST)
+        form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+        if form.is_valid():
+            preorder = models.Preorders.objects.get(pk=pk)
+            # bike = models.Bikes.objects.get(name=preorder.order.name)
+            billing = form.cleaned_data['billing']
+            preorder.address = billing
+            preorder.save()
+            # messages.success(messages, "Card changed")
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+
+@login_required()
 def edit_card(request, pk):
     """edits card for order """
     user = request.user
@@ -167,6 +191,28 @@ def edit_card(request, pk):
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, "Credit card edited!")
+            return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+@login_required()
+def change_card(request, pk):
+    """changes the card on a order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    order = models.Order.objects.filter(name=user.username, email=user.email)
+    form = forms.CardSelectionForm()
+    form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+    if request.method == "POST":
+        form = forms.CardSelectionForm(request.POST)
+        form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+        if form.is_valid():
+            preorder = models.Preorders.objects.get(pk=pk)
+            card = form.cleaned_data['card']
+            preorder.payment = card
+            preorder.save()
+            # messages.success(messages, "Card changed")
             return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/add.html', {'form': form})
 

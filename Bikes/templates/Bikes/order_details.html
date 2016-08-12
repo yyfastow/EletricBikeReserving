@@ -11,10 +11,12 @@
                 <h3>Planned to ship at this address:</h3>
                 <h5>{{ order.address.address }} {{ order.address.city }} {{ order.address.state }} {{ order.address.zip }}</h5>
                 <a href="{% url 'bikes:edit_address' pk=order.pk%}" class="button">Edit Address</a>
+                <a href="{% url 'bikes:change_address' pk=order.pk%}" class="button">Change Address</a>
             </div>
             <div class="row columns">
                 <h3>We will charge {{ order.payment }}  for the bike!</h3>
                  <a href="{% url 'bikes:edit_card' pk=order.pk%}" class="button">Edit Card</a>
+                 <a href="{% url 'bikes:change_card' pk=order.pk%}" class="button">Change Card</a>
     </div>
             <h6><a href="{%  url 'bikes:cancel' pk=order.pk %}">Cancel Order</a></h6>
     </div>
