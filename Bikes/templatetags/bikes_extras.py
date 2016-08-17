@@ -14,6 +14,11 @@ def preorders_needed(bike):
 
 
 @register.assignment_tag
+def order_link(user_name):
+    return models.Order.objects.get(name=user_name)
+
+
+@register.assignment_tag
 def bikes_available(type):
     bikes = models.Bikes.objects.filter(type=type)
     return bikes

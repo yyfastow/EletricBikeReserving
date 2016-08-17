@@ -7,6 +7,7 @@
 {% block content %}
     <div class="row">
         <p>Total charged:  {{ order.total_charge }}</p>
+        <a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a>
         <h3>These are the bikes {{ order.name }} ordered:</h3>
         <p></p>
     </div>

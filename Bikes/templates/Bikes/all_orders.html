@@ -5,6 +5,7 @@
 {% block content %}
     <div class="row">
         {%  for order in orders %}
+            {% if order.name != "Anonymous" %}
             <div class="small-6 columns">
                 <div class="callout">
                     <h5>Name: {{ order.name }}</h5>
@@ -13,10 +14,11 @@
                         <li>Phone: {{ order.phone }}</li>
                         <li>total to charge: {{ order.total_charge }}</li>
                         <li><a href="{% url 'bikes:users_orders' pk=order.pk %}">See all Bikes Ordered by {{ order.name }}</a></li>
-                        <li><a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a></li>
+                        <a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a>
                     </ul>
                 </div>
             </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endblock %}

@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="row columns">
-        <h3>Send message to {{ order.name }}</h3>
+        <h3>Send message to <a href="{% url 'bikes:users_orders' pk=order.pk %}">{{ order.name }}</a></h3>
         <form action="" method="POST">
             {{ message.as_p }}
             {% csrf_token %}

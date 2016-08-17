@@ -1,10 +1,7 @@
 {%  extends "layout.html" %}
+{% load bikes_extras %}
 
 {%  block title %} Electric Bikes shop {%  endblock %}
-
-{% block submenu %}
-
-{% endblock %}
 
 {%  block content %}
     <div class="row">
@@ -20,10 +17,20 @@
                 <div class="small-6 columns">
                     <div class="callout">
                         {% if user.is_superuser %}
-                            <h3>{{ message.user.name }}</h3>
+                            {% order_link message.user.name as order %}
+                            {% if order.name != "Anonymous" %}
+                                <h3><a href="{% url 'bikes:users_orders' pk=order.pk %}">{{ order.name }}</a></h3>
+                                 <a href="{% url 'bikes:admin_message' pk=order.pk %}" ><p>Message Back!</p></a>
+                            {% else %}
+                                <h3>{{ order.name }}</h3>
+                            {% endif %}
+                            <p>{{ message.message }}</p>
+
+                            <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
+                        {% else %}
+                            <p>{{ message.message }}</p>
+                            <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
                         {% endif %}
-                        <p>{{ message.message }}</p>
-                        <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
                     </div>
                 </div>
             {%  endfor %}
