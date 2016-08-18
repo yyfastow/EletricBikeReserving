@@ -8,7 +8,7 @@
         {%  for bike in bikes %}
             <div class="small-6 columns">
                 <div class="callout">
-                    <img src="{{ bike.picture }}">
+                    <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image"/>
                     <h5><a href="{% url 'bikes:details' types_pk=bike.type.pk bike_pk=bike.pk %}">{{ bike.name }}</a></h5>
                     <p>{{ bike.type }}</p>
                     <p>{{ bike.price }}</p>

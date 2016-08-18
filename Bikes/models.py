@@ -48,16 +48,6 @@ class Order(models.Model):
     email = models.EmailField(max_length=254)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone Number")
     phone = models.CharField(max_length=17, validators=[phone_regex])
-    #state = USStateField()
-    #city = models.CharField(max_length=25)
-    #address = models.CharField(max_length=100)
-    #zip = USZipCodeField()
-    #number = models.IntegerField("Credit Card Number")
-    #expiration = models.DateTimeField()
-    #ccv_number = models.IntegerField("CCV Number")
-                                    # validators=([MaxValueValidator(9999)]))
-
-    # , widget = forms.TextInput(attrs={'size': '4'})
 
     def __str__(self):
         return self.name

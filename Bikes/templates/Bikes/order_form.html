@@ -1,17 +1,11 @@
-{% extends "layout.html" %}
+{% extends "bikes/detail_layout.html" %}
 
 {% block title %}Order an {{ bike.name }}!{% endblock %}
 
-{% block content %}
-    <div class="row column">
-        <h3>{{ bike.name }}</h3>
-        <h5>{{ bike.type }}</h5>
-        <img src="{{ bike.picture }}">
-        <p>{{ bike.price }}</p>
-        <p>{{ bike.description }}</p>
-        <p>Allready have an account: <a href="{% url 'bikes:login' %}">Login and order another</a></p>
-    </div>
+{% block details %}
+
     <div class="row columns">
+        <p>Allready have an account: <a href="{% url 'bikes:login' %}">Login and order another</a></p>
         <h3>Fill out this form to order an bike!</h3>
         <form action="" method="POST">
             <h4>Personal Info</h4>

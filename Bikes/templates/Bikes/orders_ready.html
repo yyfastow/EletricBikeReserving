@@ -23,7 +23,7 @@
                     <a href="{% url 'bikes:shipping' pk=preorder.pk %}">
                     <h5>{{ preorder }}</h5>
                     <p>{{ preorder.price }}</p>
-                    <img src="{ preorder.picture }}">
+                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image"/>
                     {% order_per_bike preorder order "shipping" as amount %}
                     <p>Amount ordered: {{ amount }}</p>
                     <p>status: shipping</p>
@@ -45,7 +45,7 @@
                     <a href="{% url 'bikes:shipped' pk=preorder.pk %}">
                     <h5>{{ preorder }}</h5>
                     <p>{{ preorder.price }}</p>
-                        <img src="{ preorder.picture }}">
+                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image" />
                     {% order_per_bike preorder order "shipped" as amount %}
                     <p>Amount ordered: {{ amount }}</p>
                     <p>status: shipped</p>

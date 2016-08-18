@@ -18,7 +18,7 @@
                     <h5>{{ preorder.order }}</h5>
                     <p>{{ preorder.order.price }}</p>
 
-                    <img src="{{ preorder.order.picture }}">
+                    <img src="{{ preorder.order.picture.url }}" alt="picture of {{ preorder.order }} bike" class="bike_image"/>
                     <h4>{{ preorder.status }}</h4>
                     <p>Ship to: {{ preorder.address }} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</p>
                     <h5>Credit card info</h5>

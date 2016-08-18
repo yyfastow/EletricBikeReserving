@@ -127,7 +127,7 @@ def sending_order_details(request, pk):
     order = models.Preorders.objects.filter(user_info=user_profile, order=bike, status="shipped")
     return render(request,
                   'bikes/send_details.html',
-                  {'user': user, 'orders': order, 'bike': bike})
+                  {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': "shipped"})
 
 
 @login_required()
@@ -136,13 +136,13 @@ def edit_address(request, pk):
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    order = models.Preorders.objects.get(pk=pk)
-    if order.user_info.email != user.email and order.user_info != user.username:
+    bill = models.Billing.objects.get(pk=pk)
+    if bill.user_info.email != user.email and bill.user_info != user.username:
         return users_orders(request)
     # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.BillingForm(instance=order.address)
+    form = forms.BillingForm(instance=bill)
     if request.method == "POST":
-        form = forms.BillingForm(request.POST, instance=order.address)
+        form = forms.BillingForm(request.POST, instance=bill)
         if form.is_valid():
             form.save()
             messages.add_message(request, messages.SUCCESS, "address edited!")
@@ -297,6 +297,7 @@ def email_name_unique(request, name, email, user=None):
 
 @login_required()
 def change_password(request):
+    """form to change password"""
     user = request.user
     form = forms.PasswordForm()
     if request.method == 'POST':

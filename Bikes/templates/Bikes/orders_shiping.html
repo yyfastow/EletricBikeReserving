@@ -33,7 +33,7 @@
         <div class="small-6 columns">
             <div class="callout">
                 <h5>{{ preorder.order }}</h5>
-                <img src="{ preorder.order.picture }}">
+                <img src="{{ preorder.order.picture.url }}" alt="picture of {{ preorder.order }} bike" class="bike_image"/>
                 <p>{{ preorder.user_info.name }}</p>
                 <p>{{ preorder.address.address}} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</p>
                 <a href="{% url 'bikes:recieved' pk=preorder.pk %}" class="button">Mark as Recieved!</a>

@@ -10,7 +10,7 @@
             {% if bike %}
             <div class="small-6 columns">
                 <div class="callout">
-                    <img src="{{ bike_type.picture }}">
+                    <img src="{{ bike_type.picture.url }}" alt="picture of {{ bike_type }} bike" class="bike_image"/>
                     <h5><a href="{%  url 'bikes:list'  pk=bike_type.pk%}">{{ bike_type.type }}</a></h5>
                 </div>
             </div>

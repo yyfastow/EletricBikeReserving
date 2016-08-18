@@ -24,12 +24,12 @@
             <div class="small-6 columns">
                 <div class="callout">
                     <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
-                    <h5>{{ preorder }}</h5>
-                    <p>{{ preorder.price }}</p>
-                    <img src="{ preorder.picture }}" />
+                        <h5>{{ preorder }}</h5>
+                        <p>{{ preorder.price }}</p>
+                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image" />
                         {% order_per_bike preorder order "reserved" as amount %}
                         <p>Amount ordered: {{ amount }}</p>
-                </a>
+                    </a>
                 </div>
             </div>
         {%  endfor %}

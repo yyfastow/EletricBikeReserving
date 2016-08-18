@@ -4,7 +4,7 @@
     <div class="row columns">
         <h3>{{ bike.name }}</h3>
         <h5>{{ bike.type }}</h5>
-        <img src="{{ bike.picture }}">
+        <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image_display"/>
         <p>{{ bike.price }}</p>
         <p>{{ bike.description }}</p>
         {% block details %}{% endblock %}
