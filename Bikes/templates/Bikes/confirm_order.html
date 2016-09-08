@@ -18,6 +18,7 @@
             </div>
             {% csrf_token %}
             <div class="submit_seperator">
+                <p> Amount: {{ amount.as_p }}{% csrf_token %}</p>
                 <input type="submit" class="button">
             </div>
         </form>

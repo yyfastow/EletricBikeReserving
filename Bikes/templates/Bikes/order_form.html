@@ -19,6 +19,8 @@
             <h4>Credit Card Info</h4>
             {{ card.as_p }}
             {% csrf_token %}
+
+            <p>Amount: {{ amount.as_p }}{% csrf_token %}</p>
             <input type="submit" class="button">
         </form>
     </div>

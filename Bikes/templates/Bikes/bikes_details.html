@@ -9,12 +9,21 @@
             <p> Preorders now:  {{ bike.orders }}</p>
             <p>Preorders left:  {{ more }}</p>
         {% endif %}
+
         {% if user.is_superuser %}
             <a href="{% url 'bikes:bike_ordered' pk=bike.pk %}" class="button">Veiw all orders!</a>
         {% elif user.is_authenticated %}
-             <a href="{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Order now!</a>
+            <form method="POST" action= "{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}">
+                {% csrf_token %}
+                <input type="number" name="amount" placeholder="1" value="{{ request.POST.amount }}">
+                <input type="submit" class="button" value="Order now!">
+            </form>
         {% else %}
-             <a href="{% url 'bikes:order' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Make an account and Order!</a>
+            <form method="GET" action= "{% url 'bikes:order' types_pk=bike.type.pk bike_pk=bike.pk %}">
+                {% csrf_token %}
+                <input type="number" name="amount" value="{{ request.GET.amount }}">
+                <input type="submit" class="button" value="Make an account and Order!">
+            </form>
         {% endif %}
     </div>
 {% endblock %}

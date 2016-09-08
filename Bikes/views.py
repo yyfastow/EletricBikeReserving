@@ -332,40 +332,46 @@ def order_bike(request, types_pk, bike_pk):
     password = forms.PasswordForm()
     billing = forms.BillingForm()
     card = forms.CardForm()
+    amount = forms.AmountForm(request.GET, empty_permitted=True)
     if request.method == "POST":
         form = forms.OrderForm(request.POST)
         password = forms.PasswordForm(request.POST)
         billing = forms.BillingForm(request.POST)
         card = forms.CardForm(request.POST)
-        if form.is_valid() and password.is_valid() and billing.is_valid() and card.is_valid() and  email_name_unique(
+        amount = forms.AmountForm(request.POST)
+        if form.is_valid() and password.is_valid() and billing.is_valid() and card.is_valid() and amount.is_valid() and  email_name_unique(
                 request, form.cleaned_data['name'], form.cleaned_data['email']):
             order = form.save(commit=False)
-            order.total_charge = bike.price
+            order.total_charge = 0.00
             order.save()
             addr = billing.save(commit=False)
             addr.user_info = order
             addr.save()
             payment = card.save(commit=False)
-            payment.user_info =  order
+            payment.user_info = order
             payment.save()
-            Preorders.objects.create(user_info=order,
-                                     address=addr,
-                                     payment=payment,
-                                     order=bike)
-            bike.orders += 1
-            bike.save()
+
+            for num in range(0, amount.cleaned_data['amount']):
+                Preorders.objects.create(user_info=order,
+                                         address=addr,
+                                         payment=payment,
+                                         order=bike)
+                order.total_charge += bike.price
+                order.save()
+                bike.orders += 1
+                bike.save()
+                if bike.orders >= bike.orders_needed:
+                    anought_orders(request, bike)
+                else:
+                    messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             user = User.objects.create_user(
                 form.cleaned_data['name'],
                 form.cleaned_data['email'],
                 password.cleaned_data['password']
             )
-            if bike.orders >= bike.orders_needed:
-                anought_orders(request, bike)
-            else:
-                messages.add_message(request, messages.SUCCESS, "Your order is sent!")
             login(request, user)
             return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/order_form.html', {'form': form, 'billing': billing, 'card': card, 'bike': bike, 'password': password})
+    return render(request, 'bikes/order_form.html', {'form': form, 'billing': billing, 'card': card, 'bike': bike, 'password': password, 'amount': amount})
 
 
 def anought_orders(request, bike):
@@ -423,30 +429,32 @@ def order_another_bike(request, types_pk, bike_pk):
     form = forms.SelectionForm()
     form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
     form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+    amount = forms.AmountForm(request.POST, empty_permitted=True)
     if request.method == "POST":
         form = forms.SelectionForm(request.POST)
         form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
         form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
-        if form.is_valid():
-            order.total_charge += bike.price
-            order.save()
-            Preorders.objects.create(user_info=order,
-                                     address=form.cleaned_data['billing'],
-                                     payment=form.cleaned_data['card'],
-                                     order=bike)
-            bike.orders += 1
-            bike.save()
-            if bike.orders >= bike.orders_needed:
-                anought_orders(request, bike)
-                messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
-                    form.cleaned_data['billing'],
-                ))
-            else:
-                messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
-                    form.cleaned_data['billing'],
-                ))
+        if form.is_valid() and amount.is_valid():
+            for num in range(0, amount.cleaned_data['amount']):
+                order.total_charge += bike.price
+                order.save()
+                Preorders.objects.create(user_info=order,
+                                        address=form.cleaned_data['billing'],
+                                        payment=form.cleaned_data['card'],
+                                        order=bike)
+                bike.orders += 1
+                bike.save()
+                if bike.orders >= bike.orders_needed:
+                    anought_orders(request, bike)
+                    messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
+                        form.cleaned_data['billing'],
+                    ))
+                else:
+                    messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
+                        form.cleaned_data['billing'],
+                    ))
             return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/confirm_order.html', {'user': user,'bike': bike, 'form': form})
+    return render(request, 'bikes/confirm_order.html', {'user': user,'bike': bike, 'form': form, 'amount': amount})
 
 
 @login_required()

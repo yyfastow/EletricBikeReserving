@@ -194,6 +194,20 @@ class MessageForm(forms.ModelForm):
 
 
 
+class AmountForm(forms.Form):
+    amount = forms.IntegerField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        amount = cleaned_data.get('amount')
+
+        if amount < 1:
+            raise forms.ValidationError(
+                "You cant order zero or Negative amounts"
+            )
+
+
+
 BillingFormSet = forms.modelformset_factory(
     models.Billing,
     form=BillingForm,
