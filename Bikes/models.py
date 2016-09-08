@@ -23,6 +23,41 @@ class Bikes(models.Model):
                        decimal_places=2,
                        default_currency='USD',
                        )
+
+
+    motor = models.CharField(null=True, blank=True, max_length=100)
+    battery = models.CharField(null=True, blank=True, max_length=100)
+    PAS = models.CharField(null=True, blank=True, max_length=100)
+    controller = models.CharField(null=True, blank=True, max_length=100)
+    charger = models.CharField(null=True, blank=True, max_length=100)
+    charging_time = models.CharField(null=True, blank=True, max_length=100)
+
+    max_speed = models.IntegerField(null=True, blank=True)
+    range = models.IntegerField(null=True, blank=True)
+    max_load = models.FloatField(null=True, blank=True)
+    net_weight = models.FloatField(null=True, blank=True)
+    gross_weight = models.FloatField(null=True, blank=True)
+    container_load = models.FloatField(null=True, blank=True)
+    display = models.CharField(null=True, blank=True, max_length=100)
+
+    frame = models.CharField(null=True, blank=True, max_length=100)
+    tyres = models.CharField(null=True, blank=True, max_length=100)
+    rim = models.CharField(null=True, blank=True, max_length=100)
+    front_fork = models.CharField(null=True, blank=True, max_length=100)
+    front_brake = models.CharField(null=True, blank=True, max_length=100)
+    rear_break = models.CharField(null=True, blank=True, max_length=100)
+    speed = models.IntegerField(null=True, blank=True)
+    derailleur = models.CharField(null=True, blank=True, max_length=100)
+    stem = models.CharField(null=True, blank=True, max_length=100)
+    brake_lever = models.CharField(null=True, blank=True, max_length=100)
+    chain = models.CharField(null=True, blank=True, max_length=100)
+    chain_wheel = models.CharField(null=True, blank=True, max_length=100)
+    mudguard = models.CharField(null=True, blank=True, max_length=100)
+    saddle = models.CharField(null=True, blank=True, max_length=100)
+    pedal = models.CharField(null=True, blank=True, max_length=100)
+    packaging_size = models.CharField(null=True, blank=True, max_length=100)
+
+
     orders_needed = models.IntegerField(default=5)
     orders = models.IntegerField(default=0)
 

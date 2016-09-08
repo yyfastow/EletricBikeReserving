@@ -1,19 +1,25 @@
-{%  extends "layout.html" %}
+{% extends "bikes/detail_layout.html" %}
 
 {% block title %}Order {% endblock %}
 
-{% block content %}
+{% block details %}
     <div class="row columns">
         <form action="" method="POST">
+            <div class="left">
             <h5>Are you sure you want to order {{ bike.name }} for {{ bike.price }}</h5>
             <p>where to ship</p>
             {{ form.billing }}
-            <a href="{% url 'bikes:add_address'%}" class="button">Add another address</a>
+            <a href="{% url 'bikes:add_address' types_pk=bike.type.pk bike_pk=bike.pk%}" class="button">Add another address</a>
+            </div>
+            <div class="right">
             <p>Credit Card</p>
             {{ form.card }}
-            <a href="{% url 'bikes:add_card'%}" class="button">Add another card</a>
+            <a href="{% url 'bikes:add_card' types_pk=bike.type.pk bike_pk=bike.pk%}" class="button">Add another card</a>
+            </div>
             {% csrf_token %}
-            <input type="submit" class="button">
+            <div class="submit_seperator">
+                <input type="submit" class="button">
+            </div>
         </form>
     </div>
 {% endblock %}

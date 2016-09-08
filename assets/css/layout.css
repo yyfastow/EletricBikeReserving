@@ -11,3 +11,20 @@
     width: 400px;
     height: 400px;
 }
+
+.message_page {
+    padding-top: 50px;
+    padding-left: 50px;
+    padding-right: 50px;
+    border-top: dashed forestgreen;
+}
+
+.form_seperator {
+    padding-top: 30px;
+    border-top: dashed forestgreen;
+}
+
+.submit_seperator {
+    border-top: solid 1px #791b0c;
+    padding-top: 20px;
+}

@@ -107,7 +107,7 @@ class BillingForm(forms.ModelForm):
 
 class CardForm(forms.ModelForm):
     ccv_number = forms.IntegerField(widget=forms.TextInput(attrs={'size': '4'}))
-
+    expiration = forms.DateField(widget=forms.SelectDateWidget)
     class Meta:
         model = models.Card
         fields = ['number',

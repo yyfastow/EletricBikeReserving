@@ -7,7 +7,9 @@
         <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image_display"/>
         <p>{{ bike.price }}</p>
         <p>{{ bike.description }}</p>
-        {% block details %}{% endblock %}
+        <div class="form_seperator">
+            {% block details %}{% endblock %}
+        </div>
     </div>
     {% block orders %}{% endblock %}
 {% endblock %}

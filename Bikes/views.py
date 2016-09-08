@@ -9,6 +9,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 
 # Create your views here.
+from django.views.generic import ListView
+
 from Bikes import models, forms
 from Bikes.models import Preorders
 
@@ -20,6 +22,11 @@ def bike_type_list(request):
     return render(request,
                   'bikes/bike_types.html',
                   {'bike_types': bike_types})
+
+
+class BikeView(ListView):
+    context_object_name = "bike_types"
+    model = models.BikeTypes
 
 
 def bike_list(request, pk):
@@ -44,6 +51,7 @@ def bike_details(request, types_pk, bike_pk):
 
 # Users Views
 def message(request):
+    """user could create a message to send as message to admin"""
     user = request.user
     order = ""
     if request.user.is_authenticated():
@@ -103,7 +111,7 @@ def order_details(request, pk):
 
 @login_required
 def ready_order_details(request, pk):
-    """detailed order"""
+    """details or an order that is has anouf preorders to ship or status is "shipping" """
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
@@ -118,7 +126,7 @@ def ready_order_details(request, pk):
 
 @login_required
 def sending_order_details(request, pk):
-    """detailed order"""
+    """details or an order that is allready being shipped or status is "shipped"  """
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
@@ -244,31 +252,14 @@ def edit_order(request):
     order = models.Order.objects.get(name=user.username, email=user.email)
     form = forms.OrderForm(instance=order)
     billing = models.Billing.objects.filter(user_info=order)
-    # billing_form = forms.BillingInlineFormSet(queryset=billing)
-
-    # card_form = forms.CardInlineFormSet(queryset=card)
-    #info_form = forms.EditInfo(billing, card)
     if request.method == 'POST':
         form = forms.OrderForm(request.POST, instance=order,)
-        # billing_form = forms.BillingInlineFormSet(request.POST, queryset=billing)
-        # card_form = forms.CardInlineFormSet(request.POST, queryset=card)
-        # info_form = forms.EditInfo(request.POST, billing, card)
-        # nuzz = billing_form + card_form
         if form.is_valid() and email_name_unique(request,
                 form.cleaned_data['name'], form.cleaned_data['email'], user):
             form.save()
             user.username = form.cleaned_data['name']
             user.email = form.cleaned_data['email']
             user.save()
-            """messages.success(request, "Billing form checked out!")
-            bills = billing_form.save(commit=False)
-            for bill in bills:
-                    bill.user_info = form
-                    bill.save()
-            cards = card_form.save(commit=False)
-            for card in cards:
-                card.user_info = form
-                card.save()"""
             messages.success(request, "updated Order!")
             # TODO: login automatically
             return HttpResponseRedirect(reverse('bikes:user'))
@@ -287,7 +278,8 @@ def email_name_unique(request, name, email, user=None):
         messages.success(request, "This email is allready used by another user")
         return False
     elif users_name and user not in users_name:
-        messages.success(request,
+        messages.success(
+            request,
             "This name is allready used by another costomer"
         )
         return False
@@ -356,8 +348,6 @@ def order_bike(request, types_pk, bike_pk):
             payment = card.save(commit=False)
             payment.user_info =  order
             payment.save()
-
-
             Preorders.objects.create(user_info=order,
                                      address=addr,
                                      payment=payment,
@@ -371,22 +361,25 @@ def order_bike(request, types_pk, bike_pk):
             )
             if bike.orders >= bike.orders_needed:
                 anought_orders(request, bike)
-                pass
             else:
                 messages.add_message(request, messages.SUCCESS, "Your order is sent!")
-            return HttpResponseRedirect(reverse('bikes:login'))
+            login(request, user)
+            return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/order_form.html', {'form': form, 'billing': billing, 'card': card, 'bike': bike, 'password': password})
 
 
 def anought_orders(request, bike):
+    """ function that is triggered when anough bikes are ordered"""
     earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
     for early in earlier_orders:
         user_in = early.user_info
         order = models.Order.objects.get(name=user_in.name, email=user_in.email)
         billing = early.address
         card = early.payment
+        # changes status of the order to "shipping"
         early.status = "shipping"
         early.save()
+        # sends mail to admin
         send_mail(
             "Order for {}".format(bike.name),
             """Bike: {}
@@ -401,6 +394,7 @@ def anought_orders(request, bike):
             '{} <{}>'.format(user_in.name, user_in.email),
             ['yoseffastow@gmail.com'],
         )
+        # creats massage to show to user that item is ready to ship
         carded = "{}".format(card.number)
         models.Message.objects.create(
             user=order,
@@ -456,7 +450,8 @@ def order_another_bike(request, types_pk, bike_pk):
 
 
 @login_required()
-def add_address(request):
+def add_address(request, types_pk, bike_pk):
+    """ User could add another address """
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
@@ -470,12 +465,13 @@ def add_address(request):
             billing.user_info = order
             billing.save()
             messages.add_message(request, messages.SUCCESS, "address added!")
-            return HttpResponseRedirect(reverse('bikes:type'))
+            return HttpResponseRedirect(reverse('bikes:order_more', args=(types_pk, bike_pk)))
     return render(request, 'bikes/add.html', {'form': form})
 
 
 @login_required()
-def add_card(request):
+def add_card(request, types_pk, bike_pk):
+    """form to add a credit card"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
@@ -489,7 +485,7 @@ def add_card(request):
             billing.user_info = order
             billing.save()
             messages.add_message(request, messages.SUCCESS, "Credit card added!")
-            return HttpResponseRedirect(reverse('bikes:type'))
+            return HttpResponseRedirect(reverse('bikes:order_more', args=(types_pk, bike_pk)))
     return render(request, 'bikes/add.html', {'form': form})
 
 
@@ -559,6 +555,7 @@ def orders_ready_to_ship(request):
 
 @user_passes_test(lambda user: user.is_superuser)
 def admin_send_message(request, pk):
+    """ form for admin to send a message to a costomer"""
     order = get_object_or_404(models.Order, pk=pk)
     message = forms.MessageForm()
     if request.method == "POST":
@@ -578,7 +575,7 @@ def shipping_order(request, pk):
     preorder = models.Preorders.objects.get(pk=pk)
     preorder.status = 'shipped'
     preorder.save()
-    order = models.Order.object.get(name=preorder.user_info.name)
+    order = models.Order.objects.get(name=preorder.user_info.name)
     models.Message.objects.create(
         user=order,
         message="""Your card was charged and {} is being shipped to you it will come to you in the next month

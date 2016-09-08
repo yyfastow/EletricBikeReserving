@@ -6,12 +6,11 @@
 {%  block content %}
     <div class="row">
         <h3>Welcome to the bike shop.Reserve the bike of your choice now!</h3>
-    </div>
-    <div class="row">
+        <div class="message_page">
             {% if messages %}
-                <h3>Here are your messages</h3>
+                <h4>Here are your messages</h4>
             {% elif user.is_authenticated %}
-                <h3>Your message box is empty</h3>
+                <h4>Your message box is empty</h4>
             {% endif %}
             {% for message in messages %}
                 <div class="small-6 columns">
@@ -34,5 +33,6 @@
                     </div>
                 </div>
             {%  endfor %}
+        </div>
     </div>
 {%  endblock %}
