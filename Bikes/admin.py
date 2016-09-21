@@ -10,3 +10,4 @@ admin.site.register(models.Billing)
 admin.site.register(models.Card)
 admin.site.register(models.Preorders)
 admin.site.register(models.Message)
+

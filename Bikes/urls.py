@@ -29,11 +29,16 @@ urlpatterns = [
     url(r'user/edit/$', views.edit_order, name='edit'),
     url(r'user/change password/$', views.change_password, name='change_password'),
     url(r'user/(?P<pk>\d+)/cancel order/$', views.cancel_order, name='cancel'),
-    url(r'user/add address/(?P<types_pk>\d+)/(?P<bike_pk>\d+)/$', views.add_address, name="add_address"),
-    url(r'user/add card/(?P<types_pk>\d+)/(?P<bike_pk>\d+)/$', views.add_card, name="add_card"),
+    url(r'user/add address/$', views.add_address, name="add_address"),
+    url(r'user/add card/$', views.add_card, name="add_card"),
+
+    url(r'first checkout/$', views.first_checkout, name='first_checkout'),
+    url(r'checkout/$', views.checkout, name='checkout'),
+
 
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/$', views.bike_details, name='details'),
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/order/$', views.order_bike, name='order'),
     url(r'(?P<types_pk>\d+)/(?P<bike_pk>\d+)/order more/$', views.order_another_bike, name='order_more'),
     url(r'(?P<pk>\d+)/$', views.bike_list, name='list'),
+
 ]

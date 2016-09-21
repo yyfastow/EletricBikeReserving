@@ -13,16 +13,17 @@
         {% if user.is_superuser %}
             <a href="{% url 'bikes:bike_ordered' pk=bike.pk %}" class="button">Veiw all orders!</a>
         {% elif user.is_authenticated %}
-            <form method="POST" action= "{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}">
+            <form method="POST" action="{% url 'cart:add_to_cart' pk=bike.pk %}" >
                 {% csrf_token %}
                 <input type="number" name="amount" placeholder="1" value="{{ request.POST.amount }}">
-                <input type="submit" class="button" value="Order now!">
+                <input type="submit" class="button" value="Put in cart">
             </form>
+{#             <div class="pull-right"><a href="{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Put in Cart</a></div>#}
         {% else %}
-            <form method="GET" action= "{% url 'bikes:order' types_pk=bike.type.pk bike_pk=bike.pk %}">
+            <form method="POST" action="{% url 'register' pk=bike.pk %}" >
                 {% csrf_token %}
-                <input type="number" name="amount" value="{{ request.GET.amount }}">
-                <input type="submit" class="button" value="Make an account and Order!">
+                <input type="number" name="amount" placeholder="1" value="{{ request.POST.amount }}">
+                <input type="submit" class="button" value="Register and add to cart">
             </form>
         {% endif %}
     </div>

@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% load cart_extras %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+    <div class="row">
+    {% if cart %}
+    <table>
+        <tr>
+            <th>Product</th>
+            <th>Quantity (update by pressing ENTER)</th>
+            <th>Total Amount</th>
+            <th>Remove</th>
+        </tr>
+        {% for item in cart %}
+        <tr>
+            <td><a href="">{{ item.bike }}</a></td>
+            <td><form method="POST" name="{{ item }}" action="{% url 'cart:change_amount' pk=item.pk %}" class="quantity_change">
+                {% csrf_token %}
+                <input type="number" class="quantity" name="amount" placeholder="{{ item.quantity }}" value="{{ item.quantity }}">
+            </form></td>
+            <td>{{ item.price }}</td>
+            <td><a href="{% url 'cart:remove' pk=item.pk %}" class="button">X</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+        {% total_charge cart as total_amount %}
+        <h5>Total amount: {{ total_amount }}</h5>
+        <a href="{% url 'bikes:checkout' %}" class="button submit-all">Order now!</a>
+    {% else %}
+        <h3> Cart is empty </h3>
+    {% endif %}
+    </div>
+{% endblock %}
+
+
+{% comment %}
+<script>
+{% block jquery %}
+    $(".quantity").keypress(function() {
+        // var $key = String.fromCharCode(amount.which)
+        // alert("Its working in some ways:");
+        $(".quantity_change").submit();
+    });
+{% endblock %}
+</script>{% endcomment %}

@@ -1,16 +1,14 @@
-{% extends "bikes/detail_layout.html" %}
+{% extends "cart/cart_chart.html" %}
 
-{% block title %}Order an {{ bike.name }}!{% endblock %}
+{% block title %}Make Your first order!{% endblock %}
 
-{% block details %}
+{% block order_form %}
 
     <div class="row columns">
-        <p>Allready have an account: <a href="{% url 'bikes:login' %}">Login and order another</a></p>
-        <h3>Fill out this form to order an bike!</h3>
+
+        <h3>Fill out this form to complete order!</h3>
         <form action="" method="POST">
-            <h4>Personal Info</h4>
-            {{ form.as_p }}
-            {% csrf_token %}
+            <h4>Name:  {{ user.name }}</h4>
             {{ password.as_p }}
             {% csrf_token %}
             <h4>Billing Address</h4>
@@ -19,9 +17,7 @@
             <h4>Credit Card Info</h4>
             {{ card.as_p }}
             {% csrf_token %}
-
-            <p>Amount: {{ amount.as_p }}{% csrf_token %}</p>
-            <input type="submit" class="button">
+            <input type="submit" class="button" value="Make Order">
         </form>
     </div>
 {%  endblock %}

@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% load cart_extras %}
+
+{% block content %}
+
+        <div class="row">
+        <table>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Total Amount</th>
+        </tr>
+        {% for item in cart %}
+        <tr>
+            <td><a href="">{{ item.bike }}</a></td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.price }}</td>
+        </tr>
+        {% endfor %}
+        </table>
+    {% total_charge cart as total_amount %}
+    </div>
+    <div class="form_seperator">
+        {% block order_form %}{% endblock %}
+    </div>
+{% endblock %}
