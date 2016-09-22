@@ -4,74 +4,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{%  block title %}{% endblock %}</title>
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" href="{% static 'css/foundation.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/layout.css' %}">
     {% block css %}{% endblock %}
+    <script src="https://use.fontawesome.com/9a21dc1adc.js"></script>
     <script src="{% static 'js/vendor/moderizr.js' %}"></script>
     <script src="{% static 'js/foundation.min.js' %}"></script>
     <meta class="foundation-mq">
 </head>
 <body>
-    <nav class="top-bar" role="navigation">
-        <section class="top-bar-left">
-            <ul class="dropdown menu" data-dropdown-menu role="menubar">
-                <li class="menu-text">The Electric Bike Shop!</li>
+<nav class="top-bar" role="navigation">
+    <section class="top-bar-left">
+        <ul class="dropdown menu" data-dropdown-menu role="menubar">
+            <li class="menu-text">The Electric Bike Shop!</li>
 
-                {% block submenu %}{% endblock %}
-                {% if user.is_superuser %}
-                    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:all_orders' %}">orders</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:shipping' %}">Bikes ready to ship</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
-                    <li class="has-submenu"><a href="{% url 'home' %}">Messages</a></li>
-                {% elif user.is_authenticated %}
-                    <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
-                    <li class="has-submenu"><a href="{% url 'home' %}">Message</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:message' %}">Send us a message</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:ready' %}">Orders being shipped now</a></li>
-                {% else %}
-                    <li class="has-submenu"><a href="{% url 'bikes:login' %}">Login</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
-                    <li class="has-submenu"><a href="{% url 'bikes:message' %}">Send us a message</a></li>
-                {% endif %}
-            </ul>
-        </section>
-    </nav>
-    {% if messages %}
-        <div class="row">
-            <div class="small-6 small-centered columns">
-                {% for message in messages %}
-                    <div data-alert class="alert-box {{ message.tags }}redius">
-                        {{ message }}
-                        <a href="#" class="close">&times;</a>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    {% endif %}
+            {% block submenu %}{% endblock %}
+            {% if user.is_superuser %}
+                <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:all_orders' %}">orders</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:shipping' %}">Bikes ready to ship</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+                <li class="has-submenu"><a href="{% url 'home' %}">Messages</a></li>
+            {% elif user.is_authenticated %}
+                 <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-expanded="false"><i class="fa fa-truck" aria-hidden="true"></i>
+                    </a>
+                     <ul class="dropdown-menu" role="menu">
+                        <li class="has-submenu"><a href="{% url 'bikes:ready' %}">Orders being shipped now</a></li>
+                        <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
+                    </ul>
 
-    {% if user.is_superuser %}
-        <h1>Admin</h1>
-    {% endif %}
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-expanded="false"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="has-submenu"><a href="{% url 'home' %}">View your Message</a></li>
+                        <li class="has-submenu"><a href="{% url 'bikes:message' %}">Send us a message</a></li>
+                    </ul>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-expanded="false">Change Info</a>
+                    <ul class="dropdown-menu" role="menu">
+                        <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
+                        <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
+                    </ul>
+                </li>
+                <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+
+                <li class="has-submenu"><a href="{% url 'cart:cart' %}">
+                    <i class="fa fa-shopping-cart fa-navbar-cart" aria-hidden="true"></i>
+                        <span class="badge">0</span>
+                </a></li>
 
 
-    {%  block content %}{%  endblock %}
-    <footer class="row columns">
-        <hr/>
-        <div class="small-6 columns">
-            <p>&copy; Electric Bike Online Site</p>
-        </div>
-    </footer>
-        <script src="{% static 'js/vendor/jquery-2.1.4.min.js' %}"></script>
-        <script src="{% static 'js/vendor/what-input.min.js' %}"></script>
-        <script src="{% static 'js/foundation.min.js' %}"></script>
-    <script>$(document).ready(function() {
-        {%  block jquery %}{%  endblock %}
-    })</script>
-    {%  block javascript %}{%  endblock %}
-    <script>$(document).foundation();</script>
+                <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
+            {% else %}
+
+                <li class="has-submenu"><a href="{% url 'bikes:login' %}">Login</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:message' %}">Send us a message</a></li>
+            {% endif %}
+        </ul>
+    </section>
+</nav>
+{% if messages %}
+  <div class="container">
+      <div class="alert alert-success text-center">
+          {% for message in messages %}
+          <p {% if message.tags %}class="{{ message.tags }}"{% endif %}>{{ message }}</p></br>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+          {% endfor %}
+      </div>
+  </div>
+  {% endif %}
+
+{% if user.is_superuser %}
+    <h1>Admin</h1>
+{% endif %}
+
+
+{% block content %}{% endblock %}
+<footer class="row columns">
+    <hr/>
+    <div class="small-6 columns">
+        <p>&copy; Electric Bike Online Site</p>
+    </div>
+</footer>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="{% static 'js/vendor/jquery-2.1.4.min.js' %}"></script>
+<script src="{% static 'js/vendor/what-input.min.js' %}"></script>
+<script src="{% static 'js/foundation.min.js' %}"></script>
+<script>$(document).ready(function () {
+    {%  block jquery %}{%  endblock %}
+})</script>
+{% block javascript %}{% endblock %}
+<script>$(document).foundation();</script>
 </body>
 </html>

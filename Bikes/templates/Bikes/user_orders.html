@@ -4,11 +4,6 @@
 
 {% block title %}{{ user.username }} orders{% endblock %}
 
-{% block submenu %}
-    <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
-    <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
-{% endblock %}
-
 {% block content %}
     <div class="row">
         <p>Total that you will be charged:  {{ order.total_charge }}</p>

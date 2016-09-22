@@ -28,3 +28,8 @@
     border-top: solid 1px #791b0c;
     padding-top: 20px;
 }
+
+.fa-navbar-cart {
+    font-size: 24px;
+    vertical-align: middle;
+}

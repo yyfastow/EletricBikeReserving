@@ -4,18 +4,21 @@
 
 {% block content %}
     <div class="row columns">
-        <h3>edit order</h3>
+        <h3>{% if billings %}Edit info{% else %}Change Password{% endif %}</h3>
         <form action="" method="POST">
             {{ form.as_p }}
             {% csrf_token %}
-            <input type="submit" class="button">
+            {% if billings %}<p><a href="{% url 'bikes:change_password' %}">Change password</a></p>{% endif %}
+            <input type="submit" class="button" value="submit changes">
         </form>
+    {% if billings %}
             <h3>Addresses to delever to</h3>
             {% for bill in billings %}
                 <a href="{% url 'bikes:edit_address' pk=bill.pk %}" class="button">{{ bill.address }} {{ bill.city }} {{ bill.state }} {{ bill.zip }}</a>
             {% endfor %}
             <h3>Credit cards</h3>
             <a href="{% url 'bikes:edit_cards' %}" class="button">Edit cards</a>
+    {% endif %}
 
     </div>
 {% endblock %}
