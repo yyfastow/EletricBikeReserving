@@ -2,6 +2,12 @@
 
 {%  block title %}{{ bike.name }}{% endblock %}
 
+<style>
+{% block javascript %}
+
+{% endblock %}
+</style>
+
 {% block details %}
 
         {% if bike.orders < bike.orders_needed %}
@@ -20,11 +26,18 @@
             </form>
 {#             <div class="pull-right"><a href="{% url 'bikes:order_more' types_pk=bike.type.pk bike_pk=bike.pk %}" class="button">Put in Cart</a></div>#}
         {% else %}
-            <form method="POST" action="{% url 'register' pk=bike.pk %}" >
-                {% csrf_token %}
-                <input type="number" name="amount" placeholder="1" value="{{ request.POST.amount }}">
-                <input type="submit" class="button" value="Register and add to cart">
-            </form>
+
+        <div class="row columns">
+        <button class="btn btn-info dropdownform-button">Register and add to cart</button>
+        <a class="btn btn-primary" href="{% url 'login' %}">Login</a></h3>
+        <form action="" method="post" style="" id="register-form" class="dropdownform" method="POST">
+            <input type="number" name="amount" placeholder="1" value="{{ request.POST.amount }}">
+            {{ form.as_p }}
+            {% csrf_token %}
+            {{ password.as_p }}
+            <input type="submit" class="button">
+        </form>
+    </div>
         {% endif %}
     </div>
 {% endblock %}

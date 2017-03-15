@@ -1,27 +1,74 @@
 {% extends "cart/cart_chart.html" %}
 
 {% block title %}Order {% endblock %}
+<style>
+{% block javascript %}
+
+
+{% endblock %}
+</style>
+
 
 {% block order_form %}
     <div class="row columns">
-        <form action="" method="POST">
+        <div class="col-sm-10 col-sm-offset-1">
+
             <div class="left">
-            <h5>Make sure you look over your order before you press confirm.</h5>
+                <h5>Make sure you look over your order before you press confirm.</h5>
                 <h4>Total charge: {{ total_amount }}</h4>
-            <p>where to ship</p>
-            {{ form.billing }}
-            <a href="{% url 'bikes:add_address' %}" class="button">Add another address</a>
+                <p>where to ship</p>
+                <form action="" method="post">
+                    <select class="element select small" id="mock-address" name=mock-address">
+                        <option value="0" class="zero" selected="selected">----</option>
+                        {% for address in addresses %}
+                            <option class="zero" value="{{ address.pk }}">{{ address }}</option>
+                        {% endfor %}
+                        <input type="submit" value="add" style="display: none;">
+                    </select>
+                </form>
+
+                <button type="button" class="button dropdownform-button">Add another address</button>
+                <div class="inserted-form dropdownform" style="display: none;">
+                    <form action="{% url 'bikes:add_address' %}" class="add-address-form" method="POST">
+                        {{ add_address }}
+                        {% csrf_token %}
+                        <input type="submit" class="button" value="add">
+                    </form>
+                </div>
+
             </div>
             <div class="right">
-            <p>Credit Card</p>
-            {{ form.card }}
-            <a href="{% url 'bikes:add_card' %}" class="button">Add another card</a>
+
+                <p>Credit Card</p>
+                    <select id="mock-card" name="mock-card">
+                        <option value="0" selected="selected">----</option>
+                        {% for card in cards %}
+                            <option value="{{ card.pk }}">{{ card }}</option>
+                        {% endfor %}
+
+                    </select>
+
+                <button type="button" class="button dropdownform-button">Add another card</button>
+                <div class="inserted-form dropdownform " style="display: none;">
+                    <form class="add-card-form" action="{% url 'bikes:add_card' %}" method="POST">
+                        {{ add_card.as_p }}
+                        {% csrf_token %}
+                        <input type="submit" class="button" value="add">
+                    </form>
+                </div>
             </div>
-            {% csrf_token %}
+
+
             <div class="submit_seperator">
-                <p> Amount: {{ amount.as_p }}{% csrf_token %}</p>
-                <input type="submit" class="button" name="Confirm Order">
+                <form action="" method="POST" id="main-form">
+                    <div id="address-slot" style="display: none;">{{ form.billing }}</div>
+                    <div id="card-slot" style="display: none;">{{ form.card }}</div>
+                    {% csrf_token %}
+                <input type="submit" class="button order-form-submit" name="Confirm Order">
+                </form>
             </div>
-        </form>
     </div>
+    </div>
+
+    {% include 'ajax.html' %}
 {% endblock %}

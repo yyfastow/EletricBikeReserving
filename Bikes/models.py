@@ -97,7 +97,7 @@ class Billing(models.Model):
     zip = USZipCodeField()
 
     def __str__(self):
-        return self.address
+        return self.address + ", " + self.city + ", " + self.state
 
 
 class Card(models.Model):

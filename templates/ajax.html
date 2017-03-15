@@ -1,0 +1,217 @@
+<script class="ajax-page">
+    $(document).ready(function() {
+        $(".order-form-submit").click(function(event) {
+            event.preventDefault();
+            console.log("Forms ready to submit");
+            var address = $("#mock-address").val();
+            var card = $('select[name=mock-card] option:selected').val();
+            //alert(address);
+            //alert(card);
+            $("#address-slot").children("#id_billing").val(address);
+            $("#card-slot").children("#id_card").val(card);
+            //alert($("#id_billing").val());
+            //alert($("#id_card").val());
+            $(this).parent("#main-form").submit();
+            console.log("Forms submitted");
+        });
+
+        console.log("AJAX in line");
+
+        $(".add-card-form").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'bikes:add_card' %}",
+                data: formData,
+                success: function(data) {
+                    alert("card_added");
+                    console.log(data);
+                    newCard = '<option value="' + data.pk + '" selected>' + data.new_text + '</option>';
+                    $("#mock-card").prepend(newCard);
+                    $("#id_card").prepend(newCard);
+                    $(".add-card-form-div").hide();
+                    $(".add-card-form").val("");
+                },
+                error: function(error) {
+                    alert("ERRROR< ERROR<ERROR");
+                }
+            })
+        });
+
+        $(".add-address-form").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'bikes:add_address' %}",
+                data: formData,
+                success: function(data) {
+                    alert("address added");
+                    console.log(data);
+                    newAddress = '<option value="' + data.pk + '" selected>' + data.new_text + '</option>';
+                    $("#mock-address").prepend(newAddress);
+                    $("#id_billing").prepend(newAddress);
+                    $(".add-address-form-div").hide();
+                    $(".add-address-form").val("");
+                },
+                error: function(error) {
+                    alert("ERRROR< ERROR<ERROR");
+                }
+            })
+        });
+
+        // cart.html
+        function transferToFloat(total) {
+            new_total = "";
+            for (i=0; i < 20; i++) {
+                asd = total.substring(i, i+1);
+                if (asd != "$" && asd != ",") {
+                    new_total += asd;
+                }
+            }
+            new_total = parseFloat(new_total);
+            return new_total;
+        }
+
+        $(".sm-amount-form").submit(function(event) {
+            event.preventDefault();
+
+            formData = $(this).serialize();
+            pk = $(this).children('.pk').val();
+            num = $(this).children(".quantity").val();
+            if (num && num > 0) {
+            $.ajax({
+                type: "POST",
+                url: "{% url 'cart:change_amount' %}",
+                data: formData,
+                success: function(data) {
+
+                    price = data.price;
+                    // price = "$";
+{#                    for (i=old_price.length; i <= 0; i--) {#}
+{#                        if (i=2) {#}
+{#                            price += '.';#}
+{#                        }#}
+{#                        else if ((i-2)%3 == 0 && i != old_price.length && i > 2) {#}
+{#                            price += ',';#}
+{#                        }#}
+{#                        price += old_price[i]#}
+{#                    }#}
+                    $('#item-price-'+pk).text('$' + price + '.00');
+                    $("#quantity-"+pk).attr("placeholder", data.amount);
+                    total = $(".total-amount").text();
+                    new_total = transferToFloat(total);
+                    console.log(new_total);
+                    new_total = new_total - data.old_price + data.price;
+                    $(".total-amount").text("$" + new_total + ".00");
+                    alert("Amount changed");
+                },
+                error: function (error) {
+                    alert("ERROR");
+                }
+            })
+            } else {
+                alert("YOu must add in a positive number.")
+            }
+        });
+
+        $(".remove-item-form").submit(function(event) {
+            event.preventDefault();
+            pk = $(this).children(".pk").val();
+            formData = $(this).serialize();
+            value = $("#item-price-"+pk).text();
+            value = transferToFloat(value);
+            total = $(".total-amount").text();
+            total = transferToFloat(total);
+            new_total = total - value;
+            $.ajax({
+                type: 'POST',
+                data: formData,
+                url: "{% url 'cart:remove' %}",
+                success: function(data) {
+                    alert("removed");
+                    $("#item-row-"+pk).remove();
+                    $(".total-amount").text("$" + new_total + '.00');
+                },
+                error: function(error) {
+                    alert("NO");
+                }
+            })
+        });
+
+        // edit_orders.html
+        $(".edit-address-form").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $Form = $(this);
+            pk = $(this).children(".hidden-pk").val();
+            zipCode = $(this).children("#id_zip").val();
+            if (zipCode.length != 5 && zipCode.length != 10) {
+                alert("Enter a zip code in the format XXXXX or XXXXX-XXXX.");
+            } else {
+            // Error with Zip message: ()
+                $.ajax({
+                    type: 'POST',
+                    data: formData,
+                    url:  "{% url 'bikes:edit_address' %}",
+                    success: function(data) {
+                        $Form.parent().hide();
+                        $("#address-button-"+pk).text(data.text);
+                        alert("address edited");
+                    },
+                    error: function(error) {
+                        alert("Error");
+                    }
+                })
+            }
+        });
+
+        $(".edit-card-form").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $form = $(this).parent();
+            pk = $(this).children(".pk").val();
+            $.ajax({
+                type: 'POST',
+                data: formData,
+                url: "{% url 'bikes:edit_card' %}",
+                success: function(data) {
+                    if (data.error == "good") {
+                        $form.hide();
+                        $("#card-button-" + pk).text(data.card);
+                        alert("Card changed");
+                    } else {
+                        alert(data.error);
+                    }
+                },
+                error: function(error) {
+                    alert("ERROR ERROR ERROR");
+                }
+            })
+        });
+
+        // messages
+        $(".delete-message").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            pk = $(this).children(".pk").val();
+
+            $.ajax({
+                type: 'POST',
+                data: formData,
+                url: "{% url 'delete' %}",
+                success: function(data) {
+                    $("#message-"+pk).hide();
+                    alert("Message Deleted");
+                },
+                error: function(error) {
+                    alert("Error");
+                }
+            })
+        });
+
+
+
+    });
+</script>

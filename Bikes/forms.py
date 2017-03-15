@@ -3,7 +3,8 @@ from datetime import datetime
 from django import forms
 from django.contrib.auth.models import User
 
-from Bikes import models
+from Bikes import models, widgets
+
 
 # TODO: use stripe to charge, need to make account with them
 # I wont do this unless this site really becomes something that charged people
@@ -58,12 +59,35 @@ class PasswordForm(forms.Form):
 
         if User.objects.filter(password=password).exists():
             raise forms.ValidationError(
-                "This name is allready used by another costomer"
+                "This name is already used by another costumer"
+            )
+
+
+class EditInfoForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    verify_password = forms.CharField(max_length=20, required=False, label="Please verify your password",
+                                      widget=forms.PasswordInput)
+    class Meta:
+        model = models.Order
+        fields = ['name', 'phone', 'email']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password = cleaned_data.get('password')
+        verify_password = cleaned_data.get('verify_password')
+
+        if password != verify_password:
+            raise forms.ValidationError(
+                "You need to enter the same password in password and Verity Password Fields"
+            )
+
+        if User.objects.filter(password=password).exists():
+            raise forms.ValidationError(
+                "This name is already used by another costumer"
             )
 
 
 class OrderForm(forms.ModelForm):
-
     class Meta:
         model = models.Order
         fields = [
@@ -95,7 +119,7 @@ class OrderForm(forms.ModelForm):
 class BillingForm(forms.ModelForm):
     class Meta:
         model = models.Billing
-        fields = ['state', 'city', 'address', 'zip']
+        fields = ['address', 'city', 'state', 'zip']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -107,13 +131,11 @@ class BillingForm(forms.ModelForm):
 
 class CardForm(forms.ModelForm):
     ccv_number = forms.IntegerField(widget=forms.TextInput(attrs={'size': '4'}))
-    expiration = forms.DateField(widget=forms.SelectDateWidget)
+    expiration = forms.DateField(widget=widgets.MonthYearWidget())
+
     class Meta:
         model = models.Card
-        fields = ['number',
-            'expiration',
-            'ccv_number',
-            ]
+        fields = ['number', 'expiration', 'ccv_number']
 
     def clean(self):
         cleaned_data = super().clean()
@@ -121,35 +143,38 @@ class CardForm(forms.ModelForm):
         expiration = cleaned_data.get('expiration')
         ccv_number = cleaned_data.get('ccv_number')
 
-        if expiration == datetime.now():
+        if expiration <= datetime.now().date():
             raise forms.ValidationError(
                 "Credit card can not be expired"
             )
 
         if number and (len(str(number)) < 13 or len(str(number)) > 16):
-            raise forms.ValidationError("Please enter in a valid " + \
-                                        "credit card number.")
-        elif get_cc_type(number) not in ("Visa", "MasterCard",
-                                         "American Express"):
-            raise forms.ValidationError("Please enter in a Visa, " + \
-                                        "Master Card, or American Express credit card number.")
+            raise forms.ValidationError(
+                "Please enter in a valid credit card number."
+            )
+
+        # elif get_cc_type(number) not in ("Visa", "MasterCard", "American Express"):
+        #    raise forms.ValidationError("Please enter in a Visa, Master Card, or American Express credit card number.")
 
         if ccv_number and len(str(ccv_number)) > 4:
             raise forms.ValidationError(
                 "Make sure to add your ccv number no more then 4 digits!"
             )
 
+
 class SelectionForm(forms.Form):
-    card = forms.ModelChoiceField(queryset=models.Card.objects.all(),
-                                    empty_label=None)
-    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all(),
-                                    # widget=forms.RadioSelect(),
-                                    empty_label=None)
+    card = forms.ModelChoiceField(queryset=models.Card.objects.all(), empty_label=None)
+    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all(), empty_label=None)
 
     def clean(self):
         cleaned_data = super().clean()
         card = cleaned_data.get('card')
         billing = cleaned_data.get('billing')
+    if not card:
+        raise forms.ValidationError("Make sure to add value to card")
+
+    if not billing:
+        raise forms.ValidationError("Add an address above")
 
 
 class BillSelectionForm(forms.Form):
@@ -201,10 +226,13 @@ class AmountForm(forms.Form):
         cleaned_data = super().clean()
         amount = cleaned_data.get('amount')
 
-        if amount < 1:
-            raise forms.ValidationError(
-                "You cant order zero or Negative amounts"
-            )
+        if amount:
+            if amount < 1:
+                raise forms.ValidationError(
+                    "You cant order zero or Negative amounts"
+                )
+        else:
+            raise forms.ValidationError("Can't be empty")
 
 
 
@@ -217,7 +245,7 @@ BillingFormSet = forms.modelformset_factory(
 CardFormSet = forms.modelformset_factory(
     models.Card,
     form=CardForm,
-    extra=0,
+    extra=1,
 )
 
 BillingInlineFormSet = forms.inlineformset_factory(
@@ -236,8 +264,3 @@ CardInlineFormSet = forms.inlineformset_factory(
     formset=CardFormSet,
 )
 
-"""def clean(self):
-        cleaned_data = super().clean()
-        billings = cleaned_data.get('billings')
-        cards = cleaned_data.get('cards')
-"""

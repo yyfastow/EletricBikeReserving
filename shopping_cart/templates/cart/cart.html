@@ -6,6 +6,7 @@
 
 {% block content %}
     <div class="row">
+    <div class="col-sm-10 col-sm-offset-1 shopping-cart-chart" style="">
     {% if cart %}
     <table>
         <tr>
@@ -15,24 +16,32 @@
             <th>Remove</th>
         </tr>
         {% for item in cart %}
-        <tr>
-            <td><a href="">{{ item.bike }}</a></td>
-            <td><form method="POST" name="{{ item }}" action="{% url 'cart:change_amount' pk=item.pk %}" class="quantity_change">
+        <tr id="item-row-{{ item.pk }}">
+            <td><a href="{% url 'bikes:details' types_pk=item.bike.type.pk bike_pk=item.bike.pk %}">{{ item.bike }}</a></td>
+            <td><form method="POST" name="{{ item }}" action="{% url 'cart:change_amount' %}" class="sm-amount-form">
                 {% csrf_token %}
-                <input type="number" class="quantity" name="amount" placeholder="{{ item.quantity }}" value="{{ item.quantity }}">
+                <input type="hidden" class="pk" name="pk" value="{{ item.pk }}">
+                <input type="number" id="quantity-{{ item.pk }}" class="quantity" name="amount" placeholder="{{ item.quantity }}" value="{{ item.quantity }}">
             </form></td>
-            <td>{{ item.price }}</td>
-            <td><a href="{% url 'cart:remove' pk=item.pk %}" class="button">X</a></td>
+            <td id="item-price-{{ item.pk }}">{{ item.price }}</td>
+            <td><form method="post" action="{% url 'cart:remove' %}" class="remove-item-form">
+                <input type="hidden" class="pk" name="pk" value="{{ item.pk }}">
+                {% csrf_token %}
+                <input type="submit" class="button remove-item" value="X">
+            </form></td>
         </tr>
         {% endfor %}
     </table>
         {% total_charge cart as total_amount %}
-        <h5>Total amount: {{ total_amount }}</h5>
+        <h5>Total amount: <span class="total-amount">{{ total_amount }}</span></h5>
         <a href="{% url 'bikes:checkout' %}" class="button submit-all">Order now!</a>
     {% else %}
         <h3> Cart is empty </h3>
     {% endif %}
     </div>
+    </div>
+
+    {% include 'ajax.html' %}
 {% endblock %}
 
 

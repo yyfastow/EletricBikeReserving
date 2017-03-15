@@ -5,7 +5,8 @@
 {% block content %}
 
         <div class="row">
-        <table>
+        <div class="col-sm-10 col-sm-offset-1">
+        <table style="width: 100%; border: 2px outset lightcyan;">
         <tr>
             <th>Product</th>
             <th>Quantity</th>
@@ -13,14 +14,14 @@
         </tr>
         {% for item in cart %}
         <tr>
-            <td><a href="">{{ item.bike }}</a></td>
+            <td><a href="{% url 'bikes:details' types_pk=item.bike.type.pk bike_pk=item.bike.pk %}">{{ item.bike }}</a></td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.price }}</td>
         </tr>
         {% endfor %}
         </table>
     {% total_charge cart as total_amount %}
-    </div>
+    </div></div>
     <div class="form_seperator">
         {% block order_form %}{% endblock %}
     </div>

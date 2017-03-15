@@ -1,19 +1,19 @@
 {%  extends "layout.html" %}
 {% load bikes_extras %}
 
-{%  block title %} Electric Bikes shop {%  endblock %}
+{%  block title %} Messages {%  endblock %}
 
 {%  block content %}
-    <div class="row">
-        <h3>Welcome to the bike shop.Reserve the bike of your choice now!</h3>
+    <div class="row" >
+        <h3 style="margin-left: 50px;">Welcome to the bike shop.Reserve the bike of your choice now!</h3>
         <div class="message_page">
-            {% if messages %}
+            {% if your_messages %}
                 <h4>Here are your messages</h4>
             {% elif user.is_authenticated %}
                 <h4>Your message box is empty</h4>
             {% endif %}
-            {% for message in messages %}
-                <div class="small-6 columns">
+            {% for message in your_messages %}
+                <div class="col-sm-6" id="message-{{ message.pk }}">
                     <div class="callout">
                         {% if user.is_superuser %}
                             {% order_link message.user.name as order %}
@@ -23,16 +23,18 @@
                             {% else %}
                                 <h3>{{ order.name }}</h3>
                             {% endif %}
-                            <p>{{ message.message }}</p>
-
-                            <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
-                        {% else %}
-                            <p>{{ message.message }}</p>
-                            <a href="{% url 'delete' pk=message.pk %}" class="button"><p>X</p></a>
                         {% endif %}
+                        <p>{{ message.message }}</p>
+                        <form action="{% url 'delete'%}" method="POST" class="delete-message">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{ message.pk }}" name="pk" class="pk">
+                            <input type="submit" class="btn btn-danger delete-message-button" value="X">
+                        </form>
                     </div>
                 </div>
             {%  endfor %}
         </div>
     </div>
+
+    {% include 'ajax.html' %}
 {%  endblock %}

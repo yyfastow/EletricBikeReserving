@@ -1,24 +1,61 @@
 {% extends "layout.html" %}
 
+{% load bikes_extras %}
+
 {% block title %}Edit {% endblock %}
 
 {% block content %}
-    <div class="row columns">
+    <div class="row">
+    <div class="col-sm-8 col-sm-offset-1">
         <h3>{% if billings %}Edit info{% else %}Change Password{% endif %}</h3>
         <form action="" method="POST">
             {{ form.as_p }}
             {% csrf_token %}
-            {% if billings %}<p><a href="{% url 'bikes:change_password' %}">Change password</a></p>{% endif %}
-            <input type="submit" class="button" value="submit changes">
+            <input type="submit" class="button" value="Update">
         </form>
     {% if billings %}
-            <h3>Addresses to delever to</h3>
+            <h3>Addresses to deliver to</h3>
             {% for bill in billings %}
-                <a href="{% url 'bikes:edit_address' pk=bill.pk %}" class="button">{{ bill.address }} {{ bill.city }} {{ bill.state }} {{ bill.zip }}</a>
+                <div class="bill-form" style="display:inline-flex;">
+                <button class="button dropdownform-button" style="" id="address-button-{{ bill.pk }}">{{ bill.address }}, {{ bill.city }}, {{ bill.state }}, {{ bill.zip }}</button>
+                <div class="row columns dropdownform">
+                    {% get_bill_form bill as bill_form %}
+                    <form action="{% url 'bikes:edit_address' %}" method="POST" class="edit-address-form">
+                        {{ bill_form.management_form }}
+                        {{ bill_form.address }}
+                        {{ bill_form.city }}
+                        {{ bill_form.state }}
+                        {{ bill_form.zip }}
+                        <input type="hidden" name="pk" class="hidden-pk" value="{{ bill.pk }}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-success" style="margin-bottom: 5px;" value="save changes">
+                    </form>
+                </div>
+                </div>
             {% endfor %}
             <h3>Credit cards</h3>
-            <a href="{% url 'bikes:edit_cards' %}" class="button">Edit cards</a>
+            {% for card in cards %}
+                <div class="card-form" style="display:inline-flex;">
+                <button class="button dropdownform-button" style="" id="card-button-{{ card.pk }}">{{ card }}</button>
+                <div class="row columns dropdownform">
+                    {% get_card_form card as card_form %}
+                    <form action="{% url 'bikes:edit_card' %}" method="POST" style="float: right;" class="edit-card-form">
+                        {{ card_form.management_form }}
+                        {{ card_form.number }}
+                        {{ card_form.expiration }}
+                        {{ card_form.ccv_number }}
+                        <input type="hidden" name="pk" class="pk" value="{{ card.pk }}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-success" style="margin-bottom: 5px;" value="save changes">
+                    </form>
+
+                </div>
+                </div>
+            {% endfor %}
+            </div>
     {% endif %}
 
     </div>
+
+    {% include 'ajax.html' %}
 {% endblock %}

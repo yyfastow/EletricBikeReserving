@@ -56,7 +56,8 @@ TEMPLATE_CONTEXT_PROCESSORS = {
     'django.contrib.messages.context_processors.messages',
 }
 
-MIDDLEWARE_CLASSES = [
+# MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -138,17 +139,20 @@ USE_TZ = True
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 SITE_ROOT = PROJECT_ROOT
 
+STATICFILES_LOCATION = 'assets'
+
 # MEDIA_ROOT = 'C:/Users/yosef/PycharmProjects/EletricBikeReserving/Bikes/media',
 # MEDIA_URL = '/media/'
 
-# STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
-STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(SITE_ROOT, 'assets')
+STATIC_URL = '/assets/'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
-    os.path.join(SITE_ROOT, 'staticfiles'),
+    os.path.join(SITE_ROOT, 'assets'),
 )
 
+# STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
 
 MEDIA_URL = "/media/"

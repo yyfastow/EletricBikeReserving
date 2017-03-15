@@ -20,14 +20,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from EletricBikeReserving import views
-from shopping_cart.views import  register
+from shopping_cart.views import register
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    # url(r'^messages/', include('django_messages.urls')),
+
     url(r'^$', views.home, name='home'),
-    url(r'^delete/(?P<pk>\d+)/$', views.delete_message, name="delete"),
+    url(r'login/$', views.loginer, name='login'),
+    url(r'accounts/login/$', views.loginer, name='login'),
+    url(r'logout/$', views.logout_view, name='logout'),
+    url(r'message/$', views.message, name="message"),
+    url(r'^delete/$', views.delete_message, name="delete"),
     url(r'register/(?P<pk>\d+)/$', register, name='register'),
+
     url(r'^bikes/', include('Bikes.urls', namespace='bikes')),
     url(r'^cart/', include('shopping_cart.urls', namespace='cart'))
 ]

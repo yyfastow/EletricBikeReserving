@@ -1,9 +1,19 @@
 from django import template
 
-from Bikes import models
-from Bikes.models import Bikes
+from Bikes import models, forms
 
 register = template.Library()
+
+@register.assignment_tag()
+def get_bill_form(bill):
+    bill_form = forms.BillingForm(instance=bill)
+    return bill_form
+
+
+@register.assignment_tag()
+def get_card_form(card):
+    card_form = forms.CardForm(instance=card)
+    return card_form
 
 
 @register.filter('preorders_needed')

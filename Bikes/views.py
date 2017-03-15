@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.forms import forms
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
 # Create your views here.
@@ -16,14 +16,31 @@ from Bikes.models import Preorders
 
 # All Bikes views
 from shopping_cart.models import Cart
+from shopping_cart.views import add_to_cart
 
 
+def email_name_unique(request, name, email, user=None):
+    """makes sure email and password is unique"""
+    users_email = User.objects.filter(email=email)
+    users_name = User.objects.filter(username=name)
+    if users_email and user not in users_email:
+        messages.success(request, "This email is allready used by another user")
+        return False
+    elif users_name and user not in users_name:
+        messages.success(
+            request,
+            "This name is allready used by another costomer"
+        )
+        return False
+    else:
+        return True
+
+
+# bikes
 def bike_type_list(request):
     """ shows all types of bikes available """
     bike_types = models.BikeTypes.objects.all()
-    return render(request,
-                  'bikes/bike_types.html',
-                  {'bike_types': bike_types})
+    return render(request, 'bikes/bike_types.html', {'bike_types': bike_types})
 
 
 class BikeView(ListView):
@@ -42,38 +59,31 @@ def bike_list(request, pk):
 
 def bike_details(request, types_pk, bike_pk):
     """ show all bikes details"""
-    bike = get_object_or_404(models.Bikes,
-                             type_id=types_pk,
-                             pk=bike_pk)
+    bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     more = bike.orders_needed - bike.orders
-    return render(request,
-                  'bikes/bikes_details.html',
-                  {'bike': bike, 'more': more})
+    form = forms.OrderForm(request.POST or None)
+    password = forms.PasswordForm(request.POST or None)
+    amount_form = forms.AmountForm(request.POST, empty_permitted=True)
 
 
-# Users Views
-def message(request):
-    """user could create a message to send as message to admin"""
-    user = request.user
-    order = ""
-    if request.user.is_authenticated():
-        if user.is_superuser:
-            return HttpResponseRedirect(reverse('bikes:all_orders'))
-        order = models.Order.objects.get(name=user.username, email=user.email)
-    else:
-        order = models.Order.objects.get(name="Anonymous")
-    message = forms.MessageForm()
-    if request.method == "POST":
-        message = forms.MessageForm(request.POST)
-        if message.is_valid():
-            form = message.save(commit=False)
-            form.user = order
-            form.owner = "to"
-            form.save()
-            return HttpResponseRedirect(reverse('home'))
-    return render(request, 'bikes/admin_messages.html', {'message': message})
+    if form.is_valid() and password.is_valid() and amount_form.is_valid() and email_name_unique(
+            request, form.cleaned_data['name'], form.cleaned_data['email']):
+        amount = request.POST.get('amount')
+        order = form.save(commit=False)
+        order.total_charge = 0.00
+        order.save()
+        user = User.objects.create_user(
+            form.cleaned_data['name'],
+            form.cleaned_data['email'],
+            password.cleaned_data['password']
+        )
+        login(request, user)
+        print(amount)
+        return add_to_cart(request, bike_pk, amount)
+    return render(request, 'bikes/bikes_details.html', {'bike': bike, 'more': more, 'form': form, 'password': password})
 
 
+# order's
 @login_required
 def users_orders(request):
     """show all orders from current user"""
@@ -112,6 +122,7 @@ def order_details(request, pk):
                   {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': 'shipped'})
 
 
+
 @login_required
 def ready_order_details(request, pk):
     """details or an order that is has anouf preorders to ship or status is "shipping" """
@@ -140,29 +151,42 @@ def sending_order_details(request, pk):
                   {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': "shipped"})
 
 
+# change personal info
+# address
+
+
 @login_required()
-def edit_address(request, pk):
-    """edits address of posidic order"""
+def add_address(request):
+    """ User could add another address """
     user = request.user
+    next = request.GET.get('next')
     if user.is_superuser:
         return admin_orders(request)
-    bill = models.Billing.objects.get(pk=pk)
-    if bill.user_info.email != user.email and bill.user_info != user.username:
-        return users_orders(request)
-    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.BillingForm(instance=bill)
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    form = forms.BillingForm()
     if request.method == "POST":
-        form = forms.BillingForm(request.POST, instance=bill)
+        form = forms.BillingForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.add_message(request, messages.SUCCESS, "address edited!")
-            return HttpResponseRedirect(reverse('bikes:user'))
+            billing = form.save(commit=False)
+            billing.user_info = order
+            billing.save()
+            new_text = billing.address + ", " + billing.city + ", " + billing.state
+            if request.is_ajax():
+                return JsonResponse({
+                    'pk': billing.pk,
+                    'new_text': new_text
+                })
+            else:
+                messages.add_message(request, messages.SUCCESS, "address added!")
+                if next:
+                    return redirect(next)
+                return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/add.html', {'form': form})
 
 
 @login_required()
 def change_address(request, pk):
-    """changes the card on a order"""
+    """changes the addresss on a order"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
@@ -183,24 +207,64 @@ def change_address(request, pk):
     return render(request, 'bikes/add.html', {'form': form})
 
 
+# credit card
 @login_required()
-def edit_card(request, pk):
+def edit_card(request):
     """edits card for order """
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    order = models.Preorders.objects.get(pk=pk)
-
-    if order.user_info.email != user.email and order.user_info != user.username:
-        return users_orders(request)
-    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.CardForm(instance=order.payment)
+    pk = request.POST.get('pk')
+    card = models.Card.objects.get(pk=pk)
+    print(pk)
+    # if card.user_info.email != user.email and card.user_info != user.username:
+    #    return users_orders(request)
+    form = forms.CardForm(instance=card)
     if request.method == "POST":
-        form = forms.CardForm(request.POST, instance=order.payment)
+        form = forms.CardForm(request.POST, instance=card)
         if form.is_valid():
-            form.save()
-            messages.add_message(request, messages.SUCCESS, "Credit card edited!")
-            return HttpResponseRedirect(reverse('bikes:user'))
+            cards = form.save(commit=False)
+            credit_card = "{}".format(cards.number)
+            text = "****-****-****-{}".format(credit_card[-4:])
+            cards.save()
+            if request.is_ajax():
+                return JsonResponse({'card': text, 'error': 'good'})
+            else:
+                messages.add_message(request, messages.SUCCESS, "Credit card edited!")
+                return HttpResponseRedirect(reverse('bikes:user'))
+        else:
+            if request.is_ajax():
+                err = "Card is not valid"
+                return JsonResponse({'error': err})
+            else:
+                messages.error(request, "Didn't edit!")
+    return render(request, 'bikes/add.html', {'form': form})
+
+
+@login_required()
+def edit_address(request):
+    """edits address of pacific order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    bill = models.Billing.objects.get(pk=request.POST.get('pk'))
+    if bill.user_info.email != user.email and bill.user_info != user.username:
+        return users_orders(request)
+    form = forms.BillingForm(instance=bill)
+    if request.method == "POST":
+        form = forms.BillingForm(request.POST, instance=bill)
+        if form.is_valid():
+            bill = form.save(commit=False)
+            text = bill.address + ", " + bill.city + ", " + bill.state + ", " + bill.zip
+            bill.save()
+            if request.is_ajax():
+                return JsonResponse({
+                    'text': text
+                })
+            else:
+                messages.add_message(request, messages.SUCCESS, "address edited!")
+            return HttpResponseRedirect(reverse('bikes:edit'))
+
     return render(request, 'bikes/add.html', {'form': form})
 
 
@@ -222,7 +286,7 @@ def change_card(request, pk):
             preorder.payment = card
             preorder.save()
             # messages.success(messages, "Card changed")
-            return HttpResponseRedirect(reverse('bikes:user'))
+            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     return render(request, 'bikes/add.html', {'form': form})
 
 
@@ -232,61 +296,85 @@ def edit_cards(request):
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
     card = models.Card.objects.filter(user_info=order)
-    form = forms.CardFormSet(queryset=card)
-    if request.method == 'POST':
-        form = forms.CardFormSet(request.POST, queryset=card)
+    card_form = forms.CardFormSet(request.POST, queryset=card)
+    if card_form.is_valid():
+        cards = card_form.save(commit=False)
+        for card in cards:
+            card.user_info = order
+            card.save()
+        messages.success(request, "updated Credit card information!")
+    else:
+        messages.error(request, "Info is not updated")
+    return HttpResponseRedirect(reverse('bikes:edit'))
+
+
+@login_required()
+def add_card(request):
+    """form to add a credit card"""
+    user = request.user
+    next = request.GET.get('next')
+    if user.is_superuser:
+        return admin_orders(request)
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
+    form = forms.CardForm()
+    if request.method == "POST":
+        form = forms.CardForm(request.POST)
         if form.is_valid():
-            cards = form.save(commit=False)
-            for card in cards:
-                card.user_info = order
-                card.save()
-            messages.success(request, "updated Credit card infomation!")
-            return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/edit_cards.html', {'credit_cards': form})
+            card = form.save(commit=False)
+            card.user_info = order
+            card.save()
+            # card_string = card.number.split("")
+            # card_string = card_string[-4:]
+            if request.is_ajax():
+                return JsonResponse({
+                    'pk': card.pk,
+                    'new_text': card.number      # "****-****-****-{}".format(card.number[-4:])
+                })
+            else:
+                messages.add_message(request, messages.SUCCESS, "Credit card added!")
+                if next:
+                    return redirect(next)
+                return HttpResponseRedirect(reverse('bikes:checkout'))
+    return render(request, 'bikes/add.html', {'form': form})
 
 
+# edit order
 @login_required
 def edit_order(request):
     """form to edit information of user"""
     user = request.user
     order = models.Order.objects.get(name=user.username, email=user.email)
-    form = forms.OrderForm(instance=order)
+    form = forms.EditInfoForm(instance=order)
     billing = models.Billing.objects.filter(user_info=order)
+    card = models.Card.objects.filter(user_info=order)
+    card_form = forms.CardFormSet(queryset=card)
     if request.method == 'POST':
-        form = forms.OrderForm(request.POST, instance=order, )
+        form = forms.EditInfoForm(request.POST, instance=order, )
+        card_form = forms.CardFormSet(request.POST, queryset=card)
+        # password = forms.PasswordForm(request.POST)
         if form.is_valid() and email_name_unique(request,
                                                  form.cleaned_data['name'], form.cleaned_data['email'], user):
             form.save()
             user.username = form.cleaned_data['name']
             user.email = form.cleaned_data['email']
+            messages.success(request, "updated Info!")
+            password = form.cleaned_data['password']
+            if password and password != '':
+                user.set_password(form.cleaned_data['password'])
+                messages.success(request, "Changed Password!")
             user.save()
-            messages.success(request, "updated Order!")
-            # TODO: login automatically
+            new_user_info = authenticate(
+                username=form.cleaned_data['name'],
+                email=form.cleaned_data['email']
+            )
+            login(request, new_user_info)
             return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/edit_order.html', {'user': user,
-                                                     'order': order,
-                                                     'form': form,
-                                                     'billings': billing,
-                                                     })
+    return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form, 'card_form': card_form,
+                                                     'billings': billing, 'cards': card})
 
 
-def email_name_unique(request, name, email, user=None):
-    """makes sure email and password is unique"""
-    users_email = User.objects.filter(email=email)
-    users_name = User.objects.filter(username=name)
-    if users_email and user not in users_email:
-        messages.success(request, "This email is allready used by another user")
-        return False
-    elif users_name and user not in users_name:
-        messages.success(
-            request,
-            "This name is allready used by another costomer"
-        )
-        return False
-    else:
-        return True
-
-
+# change password not needed anymore
 @login_required()
 def change_password(request):
     """form to change password"""
@@ -302,26 +390,6 @@ def change_password(request):
             return HttpResponseRedirect(reverse('bikes:login'))
     return render(request, 'bikes/edit_order.html', {'user': user,
                                                      'form': form})
-
-
-@login_required()
-def cancel_order(request, pk):
-    """ cancel an order"""
-    user = request.user
-    if user.is_superuser:
-        return admin_orders(request)
-    preorder = get_object_or_404(models.Preorders, pk=pk)
-    order = models.Order.objects.get(name=user.username, email=user.email)
-    bike = models.Bikes.objects.get(name=preorder.order)
-    if request.method == 'POST' and preorder.status == 'reserved':
-        preorder.delete()
-        order.total_charge -= bike.price
-        order.save()
-        bike.orders -= 1
-        bike.save()
-        messages.add_message(request, messages.SUCCESS, "canceled order")
-        return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
 
 
 # Ordering bikes
@@ -422,12 +490,32 @@ def anought_orders(request, bike):
     messages.add_message(request, messages.SUCCESS, "You order is sent and ready for shipping")
 
 
+@login_required()
+def cancel_order(request, pk):
+    """ cancel an order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    preorder = get_object_or_404(models.Preorders, pk=pk)
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    bike = models.Bikes.objects.get(name=preorder.order)
+    if request.method == 'POST' and preorder.status == 'reserved':
+        preorder.delete()
+        order.total_charge -= bike.price
+        order.save()
+        bike.orders -= 1
+        bike.save()
+        messages.add_message(request, messages.SUCCESS, "canceled order")
+        return HttpResponseRedirect(reverse('bikes:user'))
+    return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
+
+
 def first_checkout(request):
     """ order for the first time """
     user = get_object_or_404(models.Order, name=request.user.username)
     cart = Cart.objects.filter(user=user)
     if not cart:
-        messages.error(request, "You cart is empty you cant preceed to checkout!")
+        messages.error(request, "You cart is empty you can't preceded to checkout!")
         raise Http404
     billing_form = forms.BillingForm(request.POST or None)
     card_form = forms.CardForm(request.POST or None)
@@ -453,11 +541,9 @@ def first_checkout(request):
                 bike.save()
                 if bike.orders >= bike.orders_needed:
                     anought_orders(request, bike)
-                else:
-                    messages.add_message(request, messages.SUCCESS, "Your order is sent!")
+        messages.add_message(request, messages.SUCCESS, "Your order is sent!")
         return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/order_form.html',
-                  {'cart': cart, 'user': user, 'billing': billing_form, 'card': card_form,})
+    return render(request, 'bikes/order_form.html', {'cart': cart, 'user': user, 'billing': billing_form, 'card': card_form})
 
 
 @login_required
@@ -468,7 +554,7 @@ def checkout(request):
     order = models.Order.objects.get(name=request.user.username)
     cart = Cart.objects.filter(user=order)
     if not cart:
-        messages.error(request, "You cart is empty you cant preceed to checkout!")
+        messages.error(request, "You cart is empty you cant preceded to checkout!")
         return HttpResponseRedirect(reverse('bikes:type'))
     billing = models.Billing.objects.filter(user_info=order)
     card = models.Card.objects.filter(user_info=order)
@@ -477,6 +563,8 @@ def checkout(request):
     form = forms.SelectionForm(request.POST or None)
     form.fields['billing'].queryset = billing
     form.fields['card'].queryset = card
+    add_address_form = forms.BillingForm()
+    add_card_form = forms.CardForm()
     if form.is_valid():
         for item in cart:
             bike = models.Bikes.objects.get(pk=item.bike_id)
@@ -491,17 +579,16 @@ def checkout(request):
                 bike.save()
                 if bike.orders >= bike.orders_needed:
                     anought_orders(request, bike)
-                    messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
-                        form.cleaned_data['billing'],
-                    ))
-                else:
-                    messages.add_message(request, messages.SUCCESS, "Your order is sent to {} with a card!".format(
-                        form.cleaned_data['billing'],
-                    ))
             item.delete(keep_parents=True)
+        messages.success(request,"""Your order is reserved! We will tell you when we are ready to ship. You could
+            cancel anytime before there anought order's to ship and we won't charge you until we are ready to ship.
+        """)
         return HttpResponseRedirect(reverse('bikes:user'))
+    elif request.method == "POST":
+        messages.error(request, "Form is not valid try again")
     user = request.user
-    return render(request, 'bikes/confirm_order.html', {'cart': cart, 'user': user, 'form': form})
+    return render(request, 'bikes/confirm_order.html', {'cart': cart, 'user': user, 'form': form,  'add_address': add_address_form,
+                                                        'add_card': add_card_form, 'addresses': billing, 'cards': card})
 
 
 @login_required
@@ -541,84 +628,6 @@ def order_another_bike(request, types_pk, bike_pk):
                     ))
             return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/confirm_order.html', {'user': user, 'bike': bike, 'form': form, 'amount': amount})
-
-
-@login_required()
-def add_address(request):
-    """ User could add another address """
-    user = request.user
-    next = request.GET.get('next')
-    if user.is_superuser:
-        return admin_orders(request)
-    order = models.Order.objects.get(name=user.username, email=user.email)
-    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.BillingForm()
-    if request.method == "POST":
-        form = forms.BillingForm(request.POST)
-        if form.is_valid():
-            billing = form.save(commit=False)
-            billing.user_info = order
-            billing.save()
-            messages.add_message(request, messages.SUCCESS, "address added!")
-            if next:
-                return redirect(next)
-            return HttpResponseRedirect(reverse('bikes:checkout'))
-    return render(request, 'bikes/add.html', {'form': form})
-
-
-@login_required()
-def add_card(request):
-    """form to add a credit card"""
-    user = request.user
-    next = request.GET.get('next')
-    if user.is_superuser:
-        return admin_orders(request)
-    order = models.Order.objects.get(name=user.username, email=user.email)
-    # bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
-    form = forms.CardForm()
-    if request.method == "POST":
-        form = forms.CardForm(request.POST)
-        if form.is_valid():
-            billing = form.save(commit=False)
-            billing.user_info = order
-            billing.save()
-            messages.add_message(request, messages.SUCCESS, "Credit card added!")
-            if next:
-                return redirect(next)
-            return HttpResponseRedirect(reverse('bikes:checkout'))
-    return render(request, 'bikes/add.html', {'form': form})
-
-
-# Loggin in and out
-def loginer(request):
-    """Logins user"""
-    form = forms.LoginForm()
-    if request.method == 'POST':
-        form = forms.LoginForm(request.POST)
-        if form.is_valid():
-            user = authenticate(
-                username=form.cleaned_data['name'],
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password']
-            )
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    messages.add_message(request, messages.SUCCESS, "You are now login!")
-                    return HttpResponseRedirect(reverse('bikes:type'))
-                else:
-                    messages.add_message(request, messages.ERROR, "This account has been disabled sorry!")
-                    return HttpResponseRedirect(reverse('bikes:type'))
-            else:
-                messages.add_message(request, messages.ERROR, "Invalid Login!")
-    return render(request, 'bikes/login.html', {'form': form})
-
-
-def logout_view(request):
-    """logs out user"""
-    logout(request)
-    messages.add_message(request, messages.SUCCESS, "Logout Successfully!")
-    return HttpResponseRedirect(reverse('bikes:type'))
 
 
 # Admin views
@@ -666,7 +675,7 @@ def admin_send_message(request, pk):
             form.save()
             messages.add_message(request, messages.SUCCESS, "message sent!")
             return HttpResponseRedirect(reverse('bikes:all_orders'))
-    return render(request, 'bikes/admin_messages.html', {'message': message, 'order': order})
+    return render(request, 'admin_messages.html', {'message': message, 'order': order})
 
 
 @user_passes_test(lambda user: user.is_superuser)
