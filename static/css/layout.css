@@ -102,3 +102,12 @@ label {
 .button {
     display: block;
 }
+
+
+
+/* css for diffrent screen sizes */
+@media screen and (max-width: 600px) {
+    .my-columns {
+        min-width: 100%;
+    }
+}

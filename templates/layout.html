@@ -25,7 +25,7 @@
 <nav class="top-bar" role="navigation">
     <section class="top-bar-left">
         <ul class="dropdown menu" data-dropdown-menu role="menubar">
-            <li class="menu-text">The Electric Bike Shop!</li>
+            <li class="menu-text"><a href="{% url 'bikes:type' %}" style="text-decoration: none; padding: 0; color: lightcoral">The Electric Bike Shop!</a></li>
 
             {% block submenu %}{% endblock %}
             {% if user.is_superuser %}
@@ -35,14 +35,13 @@
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
                 <li class="has-submenu"><a href="{% url 'home' %}">Messages</a></li>
             {% elif user.is_authenticated %}
-                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-expanded="false"><i class="fa fa-truck" aria-hidden="true"></i>
+                 <li class="has-submenu">
+                    <a href="{% url 'bikes:user' %}">
+                        <i class="fa fa-truck" aria-hidden="true"></i>
                     </a>
-                     <ul class="dropdown-menu" role="menu">
-                        <li class="has-submenu"><a href="{% url 'bikes:ready' %}">Orders being shipped now</a></li>
+                     {% comment %}<ul class="dropdown-menu" role="menu">
                         <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
-                    </ul>
+                    </ul>{% endcomment %}
 
                 </li>
                 <li class="dropdown">
@@ -53,13 +52,12 @@
                         <li class="has-submenu"><a href="{% url 'message' %}">Send us a message</a></li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-expanded="false">Change Info</a>
-                    <ul class="dropdown-menu" role="menu">
+                <li class="has-submenu">
+                    <a href="{% url 'bikes:edit' %}">Change Info</a>
+                    {% comment %}<ul class="dropdown-menu" role="menu">
                         <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
                         <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
-                    </ul>
+                    </ul>{% endcomment %}
                 </li>
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
 

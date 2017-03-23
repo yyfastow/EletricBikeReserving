@@ -1,55 +1,28 @@
-{% extends "layout.html" %}
+{% load bikes_extras %}
 
-{%  load bikes_extras %}
+{% for preorder in bike_orders %}
+    <div class="small-6 columns my-columns">
+        <div class="callout">
 
-{% block title %}{{ user.username }} orders{% endblock %}
+            <a href="{% url 'bikes:details' types_pk=preorder.type.pk bike_pk=preorder.pk %}">
 
-{% block content %}
-    {% if shipping or shipped %}
-        <p>Total that you will be charged:  {{ order.total_charge }}</p>
-        {% if shipping %}
-        <h3>These are the bikes ready to ship:</h3>
-    <div class="row">
-        {% orders_by_bike shipping as bike_orders %}
-        {%  for preorder in bike_orders %}
-            <div class="small-6 columns">
-                <div class="callout">
-                    <a href="{% url 'bikes:shipping' pk=preorder.pk %}">
-                    <h5>{{ preorder }}</h5>
-                    <p>{{ preorder.price }}</p>
-                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image"/>
-                    {% order_per_bike preorder order "shipping" as amount %}
-                    <p>Amount ordered: {{ amount }}</p>
-                    <p>status: shipping</p>
-                </a>
-                </div>
-            </div>
-        {%  endfor %}
+                {% order_per_bike preorder order status as amount %}
+                {% get_total_charge amount preorder as total_price %}
+                <h5><strong>{{ amount|length }}</strong> - {{ preorder }}</h5>
+                <p>{{ total_price }}</p>
+                <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image"/>
+
+                {% orders_by_address amount order as addresses %}
+                {% orders_by_card amount order as cards %}
+                <p>Amount ordered: {{ amount|length }}</p>
+                {% for address, num in addresses.items %}
+                    <p>{{ status|capfirst }} <strong>{{ num }}</strong> bikes to <strong>{{ address }}</strong></p>
+                {% endfor %}
+                {% for card, price in cards.items %}
+                    <p>We charged <strong>{{ price }}</strong> to {{ card }} card.</p>
+                {% endfor %}
+                <p>{{ status }}</p>
+            </a>
+        </div>
     </div>
-            {% endif %}
-        {% if shipped %}
-    <div class="row">
-        <h3>These are the bikes being shipped to you now:</h3>
-    </div>
-    <div class="row">
-        {% orders_by_bike shipped as bike_orders %}
-        {%  for preorder in bike_orders %}
-            <div class="small-6 columns">
-                <div class="callout">
-                    <a href="{% url 'bikes:shipped' pk=preorder.pk %}">
-                    <h5>{{ preorder }}</h5>
-                    <p>{{ preorder.price }}</p>
-                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image" />
-                    {% order_per_bike preorder order "shipped" as amount %}
-                    <p>Amount ordered: {{ amount }}</p>
-                    <p>status: shipped</p>
-                </a>
-                </div>
-            </div>
-        {%  endfor %}
-    </div>
-        {% endif %}
-    {% else %}
-        <h3>No bikes are ready to ship yet! <a href="{% url 'bikes:ready' %}">check out reserved bikes!</a></h3>
-    {% endif %}
-{% endblock %}
+{% endfor %}

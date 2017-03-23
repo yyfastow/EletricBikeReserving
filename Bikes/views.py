@@ -92,7 +92,9 @@ def users_orders(request):
         return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     preorders = models.Preorders.objects.filter(user_info=order, status="reserved")
-    return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders})
+    shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
+    shipped = models.Preorders.objects.filter(user_info=order, status="shipped")
+    return render(request, 'bikes/user_orders.html', {'user': user, 'order': order, 'preorders': preorders, 'shipping': shipping, 'shipped': shipped})
 
 
 @login_required
@@ -117,9 +119,15 @@ def order_details(request, pk):
     bike = get_object_or_404(models.Bikes, pk=pk)
     user_profile = models.Order.objects.get(name=user.username, email=user.email)
     order = models.Preorders.objects.filter(user_info=user_profile, order=bike, status="reserved")
-    return render(request,
-                  'bikes/order_details.html',
-                  {'user': user, 'orders': order, 'bike': bike, 'users': user_profile, 'status': 'shipped'})
+    print(order)
+    print(len(order))
+    if len(order) == 0:
+        print("You made no orders")
+        return users_orders(request)
+    bills = models.Billing.objects.filter(user_info=user_profile)
+    credit_cards = models.Card.objects.filter(user_info=user_profile)
+    return render(request, 'bikes/order_details.html',
+                  {'user': user, 'orders': order, 'bills': bills, 'credit_cards': credit_cards, 'bike': bike, 'users': user_profile, 'status': 'shipped'})
 
 
 
@@ -185,26 +193,49 @@ def add_address(request):
 
 
 @login_required()
-def change_address(request, pk):
+def change_address(request):
     """changes the addresss on a order"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
     order = models.Order.objects.filter(name=user.username, email=user.email)
-    form = forms.BillSelectionForm()
-    form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
-    if request.method == "POST":
-        form = forms.BillSelectionForm(request.POST)
-        form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
-        if form.is_valid():
-            preorder = models.Preorders.objects.get(pk=pk)
-            # bike = models.Bikes.objects.get(name=preorder.order.name)
-            billing = form.cleaned_data['billing']
-            preorder.address = billing
+    orders = request.POST.get("orders")
+    orders = orders.split(" ")
+    del orders[-1]
+    print(orders)
+    for item in orders:
+        selection = request.POST.get("billing"+item)
+        try:
+            address = models.Billing.objects.get(pk=selection)
+            preorder = models.Preorders.objects.get(pk=item)
+            preorder.address = address
             preorder.save()
-            # messages.success(messages, "Card changed")
-            return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/add.html', {'form': form})
+        except ValueError:
+            pass
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+# @login_required()
+# def change_address(request, pk):
+#     """changes the addresss on a order"""
+#     user = request.user
+#     if user.is_superuser:
+#         return admin_orders(request)
+#     order = models.Order.objects.filter(name=user.username, email=user.email)
+#     form = forms.BillSelectionForm()
+#     form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+#     if request.method == "POST":
+#         form = forms.BillSelectionForm(request.POST)
+#         form.fields['billing'].queryset = models.Billing.objects.filter(user_info=order)
+#         if form.is_valid():
+#             preorder = models.Preorders.objects.get(pk=pk)
+#             # bike = models.Bikes.objects.get(name=preorder.order.name)
+#             billing = form.cleaned_data['billing']
+#             preorder.address = billing
+#             preorder.save()
+#             # messages.success(messages, "Card changed")
+#             return HttpResponseRedirect(reverse('bikes:user'))
+#     return render(request, 'bikes/add.html', {'form': form})
 
 
 # credit card
@@ -268,26 +299,48 @@ def edit_address(request):
     return render(request, 'bikes/add.html', {'form': form})
 
 
-@login_required()
-def change_card(request, pk):
+def change_card(request):
     """changes the card on a order"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
     order = models.Order.objects.filter(name=user.username, email=user.email)
-    form = forms.CardSelectionForm()
-    form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
-    if request.method == "POST":
-        form = forms.CardSelectionForm(request.POST)
-        form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
-        if form.is_valid():
-            preorder = models.Preorders.objects.get(pk=pk)
-            card = form.cleaned_data['card']
+    orders = request.POST.get("orders")
+    orders = orders.split(" ")
+    del orders[-1]
+    print(orders)
+    for item in orders:
+        selection = request.POST.get("card"+item)
+        try:
+            card = models.Card.objects.get(pk=selection)
+            preorder = models.Preorders.objects.get(pk=item)
             preorder.payment = card
             preorder.save()
-            # messages.success(messages, "Card changed")
-            return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    return render(request, 'bikes/add.html', {'form': form})
+        except ValueError:
+            pass
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+# @login_required()
+# def change_card(request, pk):
+#     """changes the card on a order"""
+#     user = request.user
+#     if user.is_superuser:
+#         return admin_orders(request)
+#     order = models.Order.objects.filter(name=user.username, email=user.email)
+#     form = forms.CardSelectionForm()
+#     form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+#     if request.method == "POST":
+#         form = forms.CardSelectionForm(request.POST)
+#         form.fields['card'].queryset = models.Card.objects.filter(user_info=order)
+#         if form.is_valid():
+#             preorder = models.Preorders.objects.get(pk=pk)
+#             card = form.cleaned_data['card']
+#             preorder.payment = card
+#             preorder.save()
+#             # messages.success(messages, "Card changed")
+#             return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+#     return render(request, 'bikes/add.html', {'form': form})
 
 
 @login_required()
@@ -491,11 +544,12 @@ def anought_orders(request, bike):
 
 
 @login_required()
-def cancel_order(request, pk):
+def cancel_order(request):
     """ cancel an order"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
+    pk = request.POST.get('pk')
     preorder = get_object_or_404(models.Preorders, pk=pk)
     order = models.Order.objects.get(name=user.username, email=user.email)
     bike = models.Bikes.objects.get(name=preorder.order)
@@ -505,9 +559,35 @@ def cancel_order(request, pk):
         order.save()
         bike.orders -= 1
         bike.save()
+        if request.is_ajax():
+            new_data = models.Preorders.objects.filter(order=bike, user_info=order, status="reserved")
+            length = len(new_data)
+            return JsonResponse({
+                'length': length
+            })
         messages.add_message(request, messages.SUCCESS, "canceled order")
         return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/cancel_order.html', {'preorder': preorder, 'bike': bike})
+
+
+@login_required()
+def cancel_all_orders(request):
+    """ cancel an order"""
+    user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
+    pk = request.POST.get('pk')
+    order = models.Order.objects.get(name=user.username, email=user.email)
+    bike = models.Bikes.objects.get(pk=pk)
+    preorders = models.Preorders.objects.filter(user_info=order, order=bike, status="reserved")
+    for preorder in preorders:
+        preorder.delete()
+        order.total_charge -= bike.price
+        order.save()
+        bike.orders -= 1
+        bike.save()
+    messages.add_message(request, messages.SUCCESS, "canceled order")
+    return HttpResponseRedirect(reverse('bikes:user'))
 
 
 def first_checkout(request):

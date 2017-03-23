@@ -5,6 +5,7 @@
 {% block title %}{{ user.username }} orders{% endblock %}
 
 {% block content %}
+    <div class="col-sm-10 col-sm-offset-1">
     <div class="row">
         <p>Total that you will be charged:  {{ order.total_charge }}</p>
         {% if preorders %}
@@ -12,21 +13,47 @@
         {% else %}
             <h3>No bikes are reserved now! <a href="{% url 'bikes:ready' %}">check your shipped or ready to ship bikes!</a></h3>
         {% endif %}
-    </div>
-    <div class="row">
         {% orders_by_bike preorders as bike_orders %}
         {%  for preorder in bike_orders %}
-            <div class="small-6 columns">
+            <div class="small-6 columns my-columns">
                 <div class="callout">
+
                     <a href="{% url 'bikes:order_detail' pk=preorder.pk %}">
-                        <h5>{{ preorder }}</h5>
-                        <p>{{ preorder.price }}</p>
-                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image" />
-                        {% order_per_bike preorder order "reserved" as amount %}
-                        <p>Amount ordered: {{ amount }}</p>
-                    </a>
+
+                    <h5>{{ preorder }}</h5>
+                    <p>{{ preorder.price }}</p>
+                        <img src="{{ preorder.picture.url }}" alt="picture of {{ preorder }} bike" class="bike_image"/>
+                    {% order_per_bike preorder order "reserved" as amount %}
+                    <p>Amount ordered: {{ amount|length }}</p>
+                        <p>{{ status }}</p>
+                </a>
                 </div>
             </div>
         {%  endfor %}
+    </div>
+
+         {% if shipping or shipped %}
+             <div class="row">
+                 <h3>These are the bikes ready to ship:</h3>
+             <div class="row">
+                {% orders_by_bike shipping as bike_orders %}
+                 {% get_status "shipping" as status %}
+                {% include "Bikes/orders_ready.html" %}
+             </div>
+             </div>
+
+             {% if shipped %}
+                 <div class="row">
+                 <h3>These are the bikes being shipped to you now:</h3>
+                 <div class="row">
+                     {% orders_by_bike shipped as bike_orders %}
+                     {% get_status "shipped" as status %}
+                     {% include "Bikes/orders_ready.html" %}
+                 </div>
+                 </div>
+             {% endif %}
+         {% else %}
+              <div><h3>No bikes are ready to ship yet!</h3></div>
+         {% endif %}
     </div>
 {% endblock %}

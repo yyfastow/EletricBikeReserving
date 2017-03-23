@@ -88,16 +88,6 @@
                 success: function(data) {
 
                     price = data.price;
-                    // price = "$";
-{#                    for (i=old_price.length; i <= 0; i--) {#}
-{#                        if (i=2) {#}
-{#                            price += '.';#}
-{#                        }#}
-{#                        else if ((i-2)%3 == 0 && i != old_price.length && i > 2) {#}
-{#                            price += ',';#}
-{#                        }#}
-{#                        price += old_price[i]#}
-{#                    }#}
                     $('#item-price-'+pk).text('$' + price + '.00');
                     $("#quantity-"+pk).attr("placeholder", data.amount);
                     total = $(".total-amount").text();
@@ -211,7 +201,55 @@
             })
         });
 
+        // order_detail.html
+        $firstAddrress = $(".all-addresses-form").children(".billing").first();
+        $firstAddrress.change(function() {
+            alert($firstAddrress.val());
+            $(".billing").val($firstAddrress.val());
+            // $("#id_billing option:selected");
+        });
+
+        $firstCard = $(".all-card-form").children(".card").first();
+        $firstCard.change(function() {
+            alert($firstCard.val());
+            $(".card").val($firstCard.val());
+            // $("#id_billing option:selected");
+        });
 
 
+
+        $(".cancel-order").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            pk = $(this).children(".pk").val();
+            if (window.confirm("Are you sure you want to cancel your reservation?") == true) {
+                $.ajax({
+                    type: "POST",
+                    data: formData,
+                    url: "{% url 'bikes:cancel' %}",
+                    success: function(data) {
+                        newText = "<td class='new-item-td'>Item was removed</td>";
+                        $("#item-row-"+pk).html(newText);
+                        $(".dropdownform-button").hide();
+                        $(".old-data").hide();
+                        if (data.length == 0) {
+                            location.reload();
+                        }
+                        alert("item deleted");
+                        $(".reload-page").show();
+                    },
+                    error: function(error) {
+                        alert("error");
+                    }
+                });
+            }
+        });
+
+        $(".cancel-all-orders-button").click(function(event) {
+            event.preventDefault();
+            if (window.confirm("Are you sure you want to cancel all orders?") == true) {
+                $(".cancel-all-orders").submit();
+            }
+        });
     });
 </script>

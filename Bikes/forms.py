@@ -178,8 +178,7 @@ class SelectionForm(forms.Form):
 
 
 class BillSelectionForm(forms.Form):
-    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all(),
-                                     empty_label=None)
+    billing = forms.ModelChoiceField(queryset=models.Billing.objects.all())
 
     def clean(self):
         cleaned_data = super().clean()
@@ -187,8 +186,7 @@ class BillSelectionForm(forms.Form):
 
 
 class CardSelectionForm(forms.Form):
-    card = forms.ModelChoiceField(queryset=models.Card.objects.all(),
-                                    empty_label=None)
+    card = forms.ModelChoiceField(queryset=models.Card.objects.all())
 
     def clean(self):
         cleaned_data = super().clean()
