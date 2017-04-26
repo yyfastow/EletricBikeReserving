@@ -1,12 +1,12 @@
-{%  extends "layout.html" %}
+{% extends "layout.html" %}
 {% load bikes_extras %}
 
-{%  block title %} Messages {%  endblock %}
+{% block title %} Messages {% endblock %}
 
-{%  block content %}
-    <div class="row" >
+{% block content %}
+    <div class="row">
         <h3 style="margin-left: 50px;">Welcome to the bike shop.Reserve the bike of your choice now!</h3>
-        <div class="message_page">
+        <div class="message_page" style="padding: 10px;">
             {% if your_messages %}
                 <h4>Here are your messages</h4>
             {% elif user.is_authenticated %}
@@ -14,27 +14,38 @@
             {% endif %}
             {% for message in your_messages %}
                 <div class="col-sm-6" id="message-{{ message.pk }}">
-                    <div class="callout">
-                        {% if user.is_superuser %}
-                            {% order_link message.user.name as order %}
-                            {% if order.name != "Anonymous" %}
-                                <h3><a href="{% url 'bikes:users_orders' pk=order.pk %}">{{ order.name }}</a></h3>
-                                 <a href="{% url 'bikes:admin_message' pk=order.pk %}" ><p>Message Back!</p></a>
-                            {% else %}
-                                <h3>{{ order.name }}</h3>
-                            {% endif %}
+                <div class="callout">
+                    {% if user.is_superuser %}
+                        {% order_link message.user.name as order %}
+                        {% if order.name != "Anonymous" %}
+                            <h3><a href="{% url 'bikes:users_orders' pk=order.pk %}">{{ order.name }}</a></h3>
+                            <p>{{ message.message }}</p>
+                            <button class="dropdownform-button btn btn-success">Message Back!</button>
+                            <div class="inserted-form dropdownform" style="display: none">
+                            <h3>Send a message to {{ order.name }}:</h3>
+                            <form action="{% url 'bikes:admin_message' %}" method="POST" class="message-form">
+                                <textarea class="message" id="id_message" name="message"
+                                          placeholder="send message to {{ order }}" required></textarea>
+                                <input type="hidden" name="pk" class="pk" value="order.pk">
+                                {% csrf_token %}
+                                <input type="submit" class="button" value="send">
+                            </form></div>
+                        {% else %}
+                            <h3>{{ order.name }}</h3>
+                            <p>{{ message.message }}</p>
                         {% endif %}
-                        <p>{{ message.message }}</p>
-                        <form action="{% url 'delete'%}" method="POST" class="delete-message">
-                            {% csrf_token %}
-                            <input type="hidden" value="{{ message.pk }}" name="pk" class="pk">
-                            <input type="submit" class="btn btn-danger delete-message-button" value="X">
-                        </form>
+                        {% else %}
+                            <p style="margin-bottom: 0;">{{ message.message }}</p>
+                    {% endif %}
+
+                    <form action="{% url 'delete' %}" method="POST" class="delete-message" style="padding-top: 10px;">
+                        {% csrf_token %}
+                        <input type="hidden" value="{{ message.pk }}" name="pk" class="pk">
+                        <input type="submit" class="btn btn-danger delete-message-button" value="X">
+                    </form>
                     </div>
                 </div>
-            {%  endfor %}
+            {% endfor %}
+            </div>
         </div>
-    </div>
-
-    {% include 'ajax.html' %}
-{%  endblock %}
+{% endblock %}

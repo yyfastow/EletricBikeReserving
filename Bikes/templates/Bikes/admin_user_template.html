@@ -1,0 +1,37 @@
+
+{% load bikes_extras %}
+
+        {% comment %}
+            user_list[user] = {order.order: {
+                'billings': {order.address: 1},
+                'cards': {order.payment: order.order.price},
+                'total': order.order.price
+            }}
+        {% endcomment %}
+
+{% for x, y in bike_orders.items %}
+{% for bike, info in y.items %}
+    <div class="col-sm-6">
+        <div class="callout brown-purple-background">
+            <h5>{{ bike }}</h5>
+            <p>{{ bike.price }}</p>
+            <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image"/>
+            <h4 style="border-bottom: solid brown 1px;">Status: {{ status }}</h4>
+
+            <ul>
+            {% for address, amount in info.billings.items %}
+                <li style="margin: 20px; border-bottom: dashed brown 1px;">Ship {{ amount }} bikes to: {{ address.address }} {{ address.city }} {{ address.state }} {{ address.zip }}</li>
+            {% endfor %}
+            </ul>
+            <ul>
+            <h5 style="border-bottom: solid brown 1px;">Credit card info</h5>
+            {% for card, price in info.cards.items %}
+                <li class="m-20-mb-0">Charge {{ price }} on: {{ card.number }}</li>
+                <li class="ml-20">Expires: {{ card.expiration }}</li>
+                <li class="ml-20" style="border-bottom: dashed brown 1px;">CCV: {{ card.ccv_number }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+{% endfor %}
+{% endfor %}

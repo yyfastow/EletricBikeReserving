@@ -6,12 +6,25 @@
     <div class="row">
     {{ block.super }}
         {%  for bike in bikes %}
-            <div class="small-6 columns">
-                <div class="callout">
+            <div class="col-sm-6" >
+                <div class="callout"><a style="text-decoration: none" href="{% url 'bikes:details' types_pk=bike.type.pk bike_pk=bike.pk %}">
                     <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image"/>
-                    <h5><a href="{% url 'bikes:details' types_pk=bike.type.pk bike_pk=bike.pk %}">{{ bike.name }}</a></h5>
+                    <h5>{{ bike.name }}</h5>
                     <p>{{ bike.type }}</p>
                     <p>{{ bike.price }}</p>
+
+                </a>
+                    {% if request.user.is_superuser %}
+                <form method="post" action="{% url 'bikes:change_reservation_amount' %}" class="change-reservation-amount">
+                <input type="hidden" class="pk" name="pk" value="{{ bike.pk }}">
+                <input type="hidden" class="amount-orders" value="{{ bike.orders }}" name="amount-orders">
+                {% csrf_token %}
+                <p> Reservations needed to confirm orders:
+                    <input style="margin-right: 30px; display: inline; width: 20%;" type="number" name="amount" class="amount" value="{{ bike.orders_needed }}" placeholder="{{ bike.orders_needed }}">
+                    <small>(update by pressing enter)</small>
+                </p>
+            </form>
+                    {% endif %}
                 </div>
             </div>
         {%  endfor %}

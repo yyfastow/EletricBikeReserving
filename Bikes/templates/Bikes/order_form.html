@@ -4,7 +4,8 @@
 
 {% block order_form %}
 
-    <div class="row columns">
+    <div class="row">
+        <div class="col-lg-8 col-sm-10 col-sm-offset-1">
 
         <h3>Fill out this form to complete order!</h3>
         <form action="" method="POST">
@@ -19,5 +20,5 @@
             {% csrf_token %}
             <input type="submit" class="button" value="Make Order">
         </form>
-    </div>
+    </div></div>
 {%  endblock %}

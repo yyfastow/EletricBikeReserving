@@ -1,32 +1,51 @@
 {% extends "layout.html" %}
 
+{% load bikes_extras %}
+
 {% block title %}{{ order.name }} orders{% endblock %}
 
 {% block submenu %}{% endblock %}
 
 {% block content %}
     <div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        <h3>{{ order }}</h3>
+        <p>Phone: {{ order.phone }}</p>
+        <p>Email: {{ order.email }}</p>
         <p>Total charged:  {{ order.total_charge }}</p>
-        <a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a>
-        <h3>These are the bikes {{ order.name }} ordered:</h3>
-        <p></p>
+        <button class="dropdownform-button button">Message {{ order.name }}</button>
+        <div class="inserted-form dropdownform" style="display: none">
+        <h3>Send a message to {{ order.name }}:</h3>
+        <form action="{% url 'bikes:admin_message' %}" method="POST" class="message-form">
+            <textarea class="message" id="id_message" name="message" placeholder="send message to {{ order }}" required></textarea>
+            <input type="hidden" name="pk" class="pk" value="order.pk">
+            {% csrf_token %}
+            <input type="submit" class="button" value="send">
+        </form>
+    </div>
     </div>
     <div class="row">
-        {%  for preorder in preorders %}
-            <div class="small-6 columns">
-                <div class="callout">
-                    <h5>{{ preorder.order }}</h5>
-                    <p>{{ preorder.order.price }}</p>
+        {% if reservations %}
 
-                    <img src="{{ preorder.order.picture.url }}" alt="picture of {{ preorder.order }} bike" class="bike_image"/>
-                    <h4>{{ preorder.status }}</h4>
-                    <p>Ship to: {{ preorder.address }} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</p>
-                    <h5>Credit card info</h5>
-                    <p>Credit card number: {{ preorder.payment.number }}</p>
-                    <p>Expires: {{ preorder.payment.expiration }}</p>
-                    <p>CCV: {{ preorder.payment.ccv_number }}</p>
-                </div>
-            </div>
-        {%  endfor %}
-    </div>
+            <h3 style="margin-right: 60%;">Reserved Bikes:</h3>
+            {% get_status 'reserved' as status %}
+            {% costomers reservations as bike_orders %}
+            {% include 'bikes/admin_user_template.html' %}
+
+        {% endif %}
+        {% if shipping %}
+
+            <h3 style="margin-right: 60%;">Bikes Ready to ship:</h3>
+            {% get_status 'shipping' as status %}
+            {% costomers shipping as bike_orders %}
+            {% include 'bikes/admin_user_template.html' %}
+
+        {% endif %}
+        {% if shipped %}
+            <h3 style="margin-right: 60%;">Bikes shipped: </h3>
+            {% get_status 'shipped' as status %}
+            {% costomers shipped as bike_orders %}
+            {% include 'bikes/admin_user_template.html' %}
+        {% endif %}
+    </div></div>
 {% endblock %}

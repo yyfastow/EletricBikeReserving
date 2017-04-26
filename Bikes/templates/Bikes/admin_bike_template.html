@@ -1,0 +1,46 @@
+{% load bikes_extras %}
+
+        {% comment %}
+            user_list[user] = {order.order: {
+                'billings': {order.address: 1},
+                'cards': {order.payment: order.order.price},
+                'total': order.order.price,
+                'amount': 1
+            }}
+        {% endcomment %}
+
+{% costomers status as user_orders %}
+{% for user, orders in user_orders.items %}
+    <div class="columns my-columns">
+        <div class="callout brown-purple-background">
+            <h4>{{ user }}</h4>
+            <ul>
+                <li class="m-20-mb-5">Email: {{ user.email }}</li>
+                <li class="ml-20">Phone: {{ user.phone }}</li>
+                {% for n in orders %}
+                <li class="ml-20">Amount ordered: {{ n.amount }}</li>
+                    {% endfor %}
+            </ul>
+            {% for x, y in orders.items %}
+            <h5 class="admin-title-border" >Shipping Address</h5>
+            <ul>
+                {% for address, amount in y.billings.items %}
+                    <li class="admin-li-address"><strong>{{ amount }}: </strong> bikes to {{ address }}</li>
+
+                {% endfor %}
+            </ul>
+            <ul>
+                <h5 class="admin-title-border">Charge Card</h5>
+                {% for card, price in y.cards.items %}
+                    <li class="m-20-mb-5">Charge<strong>{{ price }}: </strong> {{ card.number }}</li>
+                    <li class="ml-20">Expiration: {{ card.expiration }}</li>
+                    <li class="ml-20 bottom-card-info">ccv_number: {{ card.ccv_number }}</li>
+                {% endfor %}
+            </ul>
+                {% endfor %}
+            <p>{{ reserved }}</p>
+            <a href="{% url 'bikes:users_orders' pk=user.pk %}" class="btn btn-primary block">View
+                all orders from {{ user }}!</a>
+        </div>
+    </div>
+{% endfor %}

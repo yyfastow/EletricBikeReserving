@@ -9,6 +9,7 @@ from Bikes import models, forms
 
 
 def home(request):
+    """ shows all messages from staff to user or from user's to staff """
     messages = []
     if request.user.is_authenticated():
         user = request.user
@@ -22,9 +23,9 @@ def home(request):
         return HttpResponseRedirect(reverse('bikes:type'))
 
 
-# Loggin in and out
+# Logs in and out
 def loginer(request):
-    """Logins user"""
+    """Login's user"""
     form = forms.LoginForm()
     if request.method == 'POST':
         form = forms.LoginForm(request.POST)
@@ -37,7 +38,7 @@ def loginer(request):
             if user is not None:
                 if user.is_active:
                     login(request, user)
-                    messages.add_message(request, messages.SUCCESS, "You are now login!")
+                    messages.add_message(request, messages.SUCCESS, "You are now logged in!")
                     return HttpResponseRedirect(reverse('bikes:type'))
                 else:
                     messages.add_message(request, messages.ERROR, "This account has been disabled sorry!")
@@ -50,7 +51,7 @@ def loginer(request):
 def logout_view(request):
     """logs out user"""
     logout(request)
-    messages.add_message(request, messages.SUCCESS, "Logout Successfully!")
+    messages.add_message(request, messages.SUCCESS, "Logged out successfully!")
     return HttpResponseRedirect(reverse('bikes:type'))
 
 
@@ -79,6 +80,7 @@ def message(request):
 
 @login_required
 def delete_message(request):
+    """ deletes message """
     pk = request.POST.get('pk')
     user = request.user
     if not user.is_superuser:

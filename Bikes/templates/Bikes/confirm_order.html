@@ -10,15 +10,15 @@
 
 
 {% block order_form %}
-    <div class="row columns">
-        <div class="col-sm-10 col-sm-offset-1">
+    <div class="row ">
+        <div class="col-lg-6 col-sm-10 col-sm-offset-1 ">
 
             <div class="left">
-                <h5>Make sure you look over your order before you press confirm.</h5>
+                <h5>Make sure you look over your order before you confirm.</h5>
                 <h4>Total charge: {{ total_amount }}</h4>
                 <p>where to ship</p>
                 <form action="" method="post">
-                    <select class="element select small" id="mock-address" name=mock-address">
+                    <select class="element select small" id="mock-address" name=mock-address" style="max-width: 70%;">
                         <option value="0" class="zero" selected="selected">----</option>
                         {% for address in addresses %}
                             <option class="zero" value="{{ address.pk }}">{{ address }}</option>
@@ -40,7 +40,7 @@
             <div class="right">
 
                 <p>Credit Card</p>
-                    <select id="mock-card" name="mock-card">
+                    <select id="mock-card" name="mock-card" style="max-width: 70%;">
                         <option value="0" selected="selected">----</option>
                         {% for card in cards %}
                             <option value="{{ card.pk }}">{{ card }}</option>
@@ -69,6 +69,4 @@
             </div>
     </div>
     </div>
-
-    {% include 'ajax.html' %}
 {% endblock %}

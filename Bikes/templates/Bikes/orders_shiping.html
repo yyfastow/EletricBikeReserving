@@ -1,34 +1,77 @@
 {% extends "layout.html" %}
 
+{% load bikes_extras %}
+
 {% block title %}ADMIN Orders ready to ship {% endblock %}
 
 {% block content %}
-    <h3>These items are ready to be shipped! ship them and mark as shipped</h3>
     <div class="row">
+        <h3>These items are ready to be shipped! ship them and mark as shipped</h3>
+
     {{ block.super }}
-        {%  for preorder in preorders %}
-            <div class="small-6 columns">
-                <div class="callout">
-                    <img src="{{ preorder.order.picture.url }}" alt="picture of {{ preorder.order }} bike" class="bike_image"/>
-                    <h5>{{ preorder.order.name }}</h5>
-                    <p>{{ preorder.order.type }}</p>
-                    <p>{{ preorder.order.price }}</p>
-                    <h5>{{ preorder.user_info.name }}</h5>
-                    <ul>
-                        <li>Email: {{ preorder.user_info.email }}</li>
-                        <li>Phone: {{ preorder.user_info.phone }}</li>
-                        <li>Billing Address: {{ preorder.address.address }} {{ preorder.address.city }} {{ preorder.address.state }} {{ preorder.address.zip }}</li>
-                        <li>Credit Card Number: {{ preorder.payment.number }}</li>
-                        <li>    Expiration: {{ preorder.payment.expiration }}</li>
-                        <li>    CCV number: {{ preorder.payment.ccv_number }}</li>
-                        <li><a href="{% url 'bikes:users_orders' pk=preorder.user_info.pk %}">See Costomer account</a></li>
-                    </ul>
-                    <a href="{% url 'bikes:mark shipped' pk=preorder.pk %}" class="button">Mark as Shipped!</a>
+        {% costomers preorders as people %}
+        {% comment %}
+            user_list[user] = {
+                order.order: {
+                    'billings': {order.address: 1},
+                    'cards': {order.payment: order.order.price},
+                    'total': order.order.price
+                }}
+        {% endcomment %}
+        {%  for person, bikes in people.items %}
+            <div class="col-sm-8 col-sm-offset-1">
+                <div class="callout user-box">
+                    <h5>{{ person.name }}</h5>
+                    <p style="margin-bottom: 5px;">Email: {{ person.email }}</p>
+                    <p style="margin-top: 5px;">Phone: {{ person.phone }}</p>
+
+
+                    {% comment %} mark shipped url {% url 'bikes:mark shipped' pk=preorder.pk %}
+                    Make the loop loop through all bikes ready to ship with the number of each bike and then loop through the billing addresses and the cards{% endcomment %}
+
+                    {% for bike, info in bikes.items %}
+                    <div class="bike-box" style="border: solid lightgrey 1px; margin-bottom: 20px; margin-left: 10%; padding: 20px; background-color: #e4efdf">
+                    <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image"/>
+                    <h5>{{ bike.name }}</h5>
+                    <p>{{ bike.type }}</p>
+                    <p>Ordered {{ info.amount }} bike{% if info.amount > 1 %}s{% endif %}, Charged: {{ info.total }}</p>
+                    <div class="addresses" style="border: solid lightgrey 1px; margin-bottom: 20px; margin-left: 10%; padding: 20px; background-color: #d0e3ef">
+                        <h5 style="border-bottom: solid blue 1px;">Addresses</h5>
+                        {% for address, amount in info.billings.items %}
+                            <div class="address">
+                            <p>Ship {{ amount }} bike{% if amount > 1 %}s{% endif %} to: {{ address.address }} {{ address.city }} {{ address.state }} {{ address.zip }}</p>
+                            <form style="border-bottom: dashed blue 1px; padding-bottom: 10px;" method="post" class="mark-shipped-form" action="{% url 'bikes:mark shipped' %}">
+                                <input type="hidden" name="address" class="address" value="{{ address.pk }}">
+                                <input type="hidden" name="user" class="user" value="{{ person.pk }}">
+                                <input type="hidden" name="bike" class="bike" value="{{ bike.pk }}">
+                                {% csrf_token %}
+                                <input type="submit" class="btn btn-success mark-shipped-button" value="Mark as Shipped">
+                            </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="cards" style="border: solid lightgrey 1px; margin-bottom: 20px; margin-left: 10%; padding: 20px; background-color: #efe0e5">
+                        <h5 style="border-bottom: solid brown 1px;">Credit cards</h5>
+                        {% for card, charge in info.cards.items %}
+                            <div id="card-{{ card.pk }}" class="card-{{ person.pk }}-{{ bike.pk }}">
+                            <p>Charge <span class="charge">{{ charge }}</span> to Number: {{ card.number }}</p>
+                            <p>    Expiration: {{ card.expiration }}</p>
+                            <p style="border-bottom: dashed brown 1px;">    CCV number: {{ card.ccv_number }}</p>
+                            </div>
+                        {% endfor %}
+                        {% comment %}<li><a href="{% url 'bikes:users_orders' pk=preorder.user_info.pk %}">See Costomer account</a></li>{% endcomment %}
+                    </div>
+                        </div>
+                        {% endfor %}
+                    <a href="#" class="button">Mark as Shipped!</a>
                 </div>
             </div>
         {%  endfor %}
     {% if shipped %}
+        <div class="col-sm-8 col-sm-offset-1">
     <h3>These items are marked as shipped</h3>
+        </div>
+
     {%  for preorder in shipped %}
         <div class="small-6 columns">
             <div class="callout">

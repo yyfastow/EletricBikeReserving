@@ -251,5 +251,97 @@
                 $(".cancel-all-orders").submit();
             }
         });
+
+        // admin - message form
+        $(".change-reservation-amount").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $pk = $(this).children(".pk");
+            $input = $(this).children("p").children(".amount");
+            amount = $input.val();
+            orders = $(this).children(".amount-orders").val();
+            newMore = parseInt(amount)  - parseInt(orders);
+            good = true;
+            if (newMore < 0) {
+                good = confirm("We will have to ship to more than we have");
+            }
+            if (good) {
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: "{% url 'bikes:change_reservation_amount' %}",
+                success: function(data){
+                    $("#orders-needed").text(amount);
+                    $input.attr("placeholder", amount);
+                    if (newMore < 1) {
+                        $("#order-p").hide();
+                    } else {
+                        $("#orders-left").text(newMore);
+                    }
+                    alert("Value changed");
+                },
+                error: function(error) {
+                    alert("ERRER");
+                }
+            });
+            }
+        });
+
+        $(".message-form").submit(function(event) {
+            event.preventDefault();
+            formData = $(this).serialize();
+            $form = $(this);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: "{% url 'bikes:admin_message' %}",
+                success: function(data) {
+                    $form.children(".message").val("");
+                    $form.parents(".dropdownform").hide();
+                    alert("Message sent");
+                },
+                error: function(error) {
+                    alert("Message not sent");
+                }
+            });
+        });
+
+        $(".mark-shipped-form").submit(function(event) {
+            // mark shipped
+            event.preventDefault();
+            formData = $(this).serialize();
+            $form = $(this);
+            $bike = $(this).children(".bike").val();
+            $user = $(this).children(".user").val();
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: "{% url 'bikes:mark shipped' %}",
+                success: function(data) {
+                    alert("Marked as shipped!");
+                    alert(data.users);
+                    alert(data.bikes);
+                    if (data.users == false && data.bikes == false) {
+                        $form.parents(".user-box").hide();
+                    } else if (data.bikes == false) {
+                        $form.parents(".bike-box").hide();
+                    } else {
+                        $form.parents(".address").hide();
+                        $(".card-"+$user+"-"+$bike).hide();
+                        for (key in data.cards) {
+                            value = data.cards[key];
+                            alert("KEY: " + key + ", VALUE: " + data.cards[key]);
+                            $("#card-"+key).show();
+                            $("#card-"+key).children("span").text("$500");
+
+                        }
+                    }
+                },
+                error: function(error) {
+                    alert("Error with ajax");
+                }
+            });
+        });
+
     });
 </script>

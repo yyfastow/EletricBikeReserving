@@ -1,0 +1,210 @@
+body {
+    background-color: #f5fff6;
+    height: 100%;
+}
+
+hr {
+    margin-bottom: 0 ;
+}
+
+li {
+    margin-left: 10px;
+}
+
+input[type=text] {
+    max-width: 600px;
+}
+
+label {
+    display: inline-block;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+/*the three main div of page*/
+
+#wrapper {
+    min-height: 100%;
+    position: relative;
+}
+
+#header {
+
+}
+
+#content {
+    padding-bottom: 75px;
+}
+
+#footer {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+}
+
+/* all classes */
+.admin-title-border {
+    border-bottom: solid brown 1px;
+}
+
+
+.admin-li-address {
+    margin: 20px;
+    border-bottom: dashed brown 1px;
+}
+
+.bike_image {
+    width: 150px;
+    height:150px;
+}
+
+.bike_image_display {
+    width: 400px;
+    height: 400px;
+}
+
+.block {
+    display: block;
+}
+
+.bottom-card-info {
+    border-bottom: dashed brown 1px;
+    margin-bottom: 20px;
+}
+
+.brown-purple-background {
+    background-color: #dbd2c3;
+}
+
+.button {
+    display: block;
+}
+
+.callout {
+    background-color: #fffee8;
+
+}
+
+.dropdownform {
+    display: none;
+}
+
+.fa-navbar-cart {
+    font-size: 24px;
+    vertical-align: middle;
+}
+
+.form_seperator {
+    padding-top: 30px;
+    border-top: dashed forestgreen;
+}
+
+.inserted-form {
+    border: 1px inset;
+    margin-left: 10%;
+    margin-bottom: 15px;
+    padding-top: 10px;
+    padding-left: 5%;
+    padding-right: 5%;
+    background-color: #eaf2ee;
+}
+
+.logo {
+    text-decoration: none;
+    padding: 0;
+    color: lightcoral;
+}
+
+.logo-footer {
+    background-color: #eeeeee;
+    padding: 20px;
+    padding-bottom: 10px;
+    margin: 0;
+}
+
+.m-20-mb-0 {
+    margin: 20px;
+    margin-left: 0;
+}
+
+.m-20-mb-5 {
+    margin: 20px;
+    margin-bottom: 5px;
+}
+
+.ml-20 {
+    margin-left: 20px;
+}
+
+.message_page {
+    padding-top: 50px;
+    padding-left: 50px;
+    padding-right: 50px;
+    border-top: dashed forestgreen;
+}
+
+.row {
+    margin-left: 10%;
+    margin-right: 10%
+}
+
+.shopping-cart-chart {
+    background-color: #fafffa;
+    padding-top: 20px;
+    border:1px outset rgba(206, 206, 227, 0.45);
+}
+
+.submit_seperator {
+    border-top: solid 1px #791b0c;
+    padding-top: 20px;
+}
+
+.top-bar {
+    margin-bottom: 1rem;
+    padding: 0;
+    border-bottom: lightgrey solid 1px;
+}
+
+/* id's */
+#id_address {
+    max-width: 90%;
+}
+
+#id_ccv_number {
+    display: inline-flex;
+    max-width: 25%;
+}
+
+#id_city {
+    display: inline-flex;
+    max-width: 40%;
+    margin-right: 5%;
+}
+
+#id_expiration_month {
+    display: inline-flex;
+    max-width: 40%;
+}
+
+#id_expiration_year {
+    display: inline-flex;
+    max-width: 30%;
+}
+
+#id_state {
+    display: inline-flex;
+    max-width: 40%;
+    margin-right: 5%;
+}
+
+#id_zip {
+    display: inline;
+    max-width: 20%;
+}
+
+/* css for diffrent screen sizes */
+@media screen and (max-width: 600px) {
+    .my-columns {
+        min-width: 100%;
+    }
+}

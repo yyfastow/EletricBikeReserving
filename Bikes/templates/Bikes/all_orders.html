@@ -4,20 +4,32 @@
 
 {% block content %}
     <div class="row">
-        {%  for order in orders %}
+        {% for order in orders %}
             {% if order.name != "Anonymous" %}
-            <div class="small-6 columns">
-                <div class="callout">
-                    <h5>Name: {{ order.name }}</h5>
-                    <ul>
-                        <li>Email: {{ order.email }}</li>
-                        <li>Phone: {{ order.phone }}</li>
-                        <li>total to charge: {{ order.total_charge }}</li>
-                        <li><a href="{% url 'bikes:users_orders' pk=order.pk %}">See all Bikes Ordered by {{ order.name }}</a></li>
-                        <a href="{% url 'bikes:admin_message' pk=order.pk %}" class="button">Message {{ order.name }}</a>
-                    </ul>
+                <div class="small-6 columns">
+                    <div class="callout">
+                        <h5>Name: {{ order.name }}</h5>
+                            <p style="margin-bottom: 5px;">Email: {{ order.email }}</p>
+                            <p style="margin-bottom: 5px;">Phone: {{ order.phone }}</p>
+                            <p>total to charge: {{ order.total_charge }}</p>
+                            <button class="dropdownform-button btn btn-primary">Message {{ order.name }}</button>
+                            <div class="inserted-form dropdownform" style="display: none">
+                                <h3>Send a message to {% if user.is_superuser %}
+                                    <a href="{% url 'bikes:users_orders' pk=order.pk %}">{{ order.name }}</a>{% else %}
+                                    us!{% endif %}</h3>
+                                <form class="message-form" action="{% url 'bikes:admin_message' %}" method="POST">
+                                    <textarea class="message" id="id_message" name="message" placeholder="send message to {{ order }}"
+                                              required></textarea>
+                                    <input type="hidden" name="pk" class="pk" value="{{ order.pk }}">
+                                    {% csrf_token %}
+                                    <input type="submit" class="button" value="send">
+                                </form>
+                            </div>
+                            <a href="{% url 'bikes:users_orders' pk=order.pk %}"
+                               class="button" style="margin-top: 10px;">See all orders from {{ order }}</a>
+
+                    </div>
                 </div>
-            </div>
             {% endif %}
         {% endfor %}
     </div>

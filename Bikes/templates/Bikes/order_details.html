@@ -13,13 +13,14 @@
 {% block orders %}
     {% orders_by_address orders users as addresses %}
     {% orders_by_card orders users as cards %}
+    <div class="row">
     {% for address, amount in addresses.items %}
         <p>Planning to ship {{ amount }} to {{ address }}</p>
     {% endfor %}
 
-    <div class="col-sm-10 col-sm-offset-1">
+    <div class="col-lg-8 col-sm-10 col-sm-offset-1">
     <div class="callout">
-    <div class="row columns">
+    <div class="">
     <div class="old-data">
     {% for address, amount in addresses.items %}
             <h3>{{ amount }} {{ bike }}'s are being shipped to {{ address }}. </h3>
@@ -109,26 +110,6 @@
         <input type="submit" class="btn btn-danger cancel-all-orders-button" value="Cancel all orders">
     </form>
 
-    </div></div></div>
-    {% comment %}{% for order in orders %}
-     <div class="small-6 columns">
-        <div class="callout">
-            <div class="row columns">
+    </div></div></div></div>
 
-                <h3>Planned to ship at this address:</h3>
-                <h5>{{ order.address.address }} {{ order.address.city }} {{ order.address.state }} {{ order.address.zip }}</h5>
-                <a href="{% url 'bikes:edit_address'%}" class="button">Edit Address</a>
-                <a href="{% url 'bikes:change_address' pk=order.pk%}" class="button">Change Address</a>
-            </div>
-            <div class="row columns">
-                <h3>We will charge {{ order.payment }}  for the bike!</h3>
-                 <a href="{% url 'bikes:edit_card' %}" class="button">Edit Card</a>
-                 <a href="{% url 'bikes:change_card' pk=order.pk%}" class="button">Change Card</a>
-    </div>
-            <h6><a href="{%  url 'bikes:cancel' pk=order.pk %}">Cancel Order</a></h6>
-    </div>
-     </div>
-        {% endfor %}{% endcomment %}
-
-    {% include 'ajax.html' %}
 {% endblock %}

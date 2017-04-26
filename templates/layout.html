@@ -22,16 +22,19 @@
     <meta class="foundation-mq">
 </head>
 <body>
-<nav class="top-bar" role="navigation">
+<div id="wrapper">
+<div id="header">
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
     <section class="top-bar-left">
-        <ul class="dropdown menu" data-dropdown-menu role="menubar">
-            <li class="menu-text"><a href="{% url 'bikes:type' %}" style="text-decoration: none; padding: 0; color: lightcoral">The Electric Bike Shop!</a></li>
 
+        <ul class="dropdown menu" data-dropdown-menu role="menubar">
+            <li class="menu-text"><a href="{% url 'bikes:type' %}" class="logo">The Electric Bike Shop!</a></li>
             {% block submenu %}{% endblock %}
             {% if user.is_superuser %}
-                <li class="has-submenu"><a href="{% url 'bikes:logout' %}">Logout</a></li>
-                <li class="has-submenu"><a href="{% url 'bikes:all_orders' %}">orders</a></li>
-                <li class="has-submenu"><a href="{% url 'bikes:shipping' %}">Bikes ready to ship</a></li>
+                <li class="has-submenu"><a href="{% url 'logout' %}">Logout</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:all_orders' %}">Costumers</a></li>
+                <li class="has-submenu"><a href="{% url 'bikes:admin_shipping' %}">Bikes ready to ship</a></li>
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
                 <li class="has-submenu"><a href="{% url 'home' %}">Messages</a></li>
             {% elif user.is_authenticated %}
@@ -39,44 +42,37 @@
                     <a href="{% url 'bikes:user' %}">
                         <i class="fa fa-truck" aria-hidden="true"></i>
                     </a>
-                     {% comment %}<ul class="dropdown-menu" role="menu">
-                        <li class="has-submenu"><a href="{% url 'bikes:user' %}">view Orders</a></li>
-                    </ul>{% endcomment %}
-
                 </li>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
                        aria-expanded="false"><i class="fa fa-envelope-o" aria-hidden="true"></i></a>
                     <ul class="dropdown-menu" role="menu">
                         <li class="has-submenu"><a href="{% url 'home' %}">View your Message</a></li>
-                        <li class="has-submenu"><a href="{% url 'message' %}">Send us a message</a></li>
+                        <li class="has-dropdown"><a href="{%  url 'message' %}">Send us a message</a></li>
                     </ul>
                 </li>
                 <li class="has-submenu">
                     <a href="{% url 'bikes:edit' %}">Change Info</a>
-                    {% comment %}<ul class="dropdown-menu" role="menu">
-                        <li class="has-submenu"><a href="{% url 'bikes:change_password' %}">Change Password</a></li>
-                        <li class="has-submenu"><a href="{% url 'bikes:edit' %}">Change account information</a></li>
-                    </ul>{% endcomment %}
                 </li>
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
-
                 <li class="has-submenu"><a href="{% url 'cart:cart' %}">
                     <i class="fa fa-shopping-cart fa-navbar-cart" aria-hidden="true"></i>
                         <span class="badge">0</span>
                 </a></li>
-
-
                 <li class="has-submenu"><a href="{% url 'logout' %}">Logout</a></li>
             {% else %}
-
                 <li class="has-submenu"><a href="{% url 'login' %}">Login</a></li>
                 <li class="has-submenu"><a href="{% url 'bikes:type' %}">Bikes</a></li>
                 <li class="has-submenu"><a href="{% url 'message' %}">Send us a message</a></li>
             {% endif %}
+
         </ul>
+
     </section>
+</div>
 </nav>
+
+
 {% if messages %}
   <div class="container">
       <div class="alert alert-success text-center">
@@ -90,18 +86,26 @@
   </div>
   {% endif %}
 
-{% if user.is_superuser %}
-    <h1>Admin</h1>
-{% endif %}
+</div>
 
 <div class="useless"></div>
-{% block content %}{% endblock %}
-<footer class="row columns">
+<div id="content">
+    {% if user.is_superuser %}
+        <div class="row"><h1>Admin</h1></div>
+    {% endif %}
+    {% block content %}{% endblock %}
+    {% include 'ajax.html' %}
+</div>
+
+<div id="footer">
+<footer>
     <hr/>
-    <div class="small-6 columns">
+    <div class="logo-footer">
         <p>&copy; Electric Bike Online Site</p>
     </div>
 </footer>
+</div>
+</div>
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <script src="{% static 'js/vendor/jquery-2.1.4.min.js' %}"></script>

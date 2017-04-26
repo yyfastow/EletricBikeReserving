@@ -139,21 +139,21 @@ USE_TZ = True
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 SITE_ROOT = PROJECT_ROOT
 
-STATICFILES_LOCATION = 'static'
+STATICFILES_LOCATION = 'assets'
 
 # MEDIA_ROOT = 'C:/Users/yosef/PycharmProjects/EletricBikeReserving/Bikes/media',
 # MEDIA_URL = '/media/'
 
-# STATIC_ROOT = os.path.join(SITE_ROOT, 'static')
-STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(SITE_ROOT, 'assets')
+STATIC_URL = '/assets/'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(SITE_ROOT, 'static'),
+    os.path.join(BASE_DIR, 'assets'),
+    os.path.join(SITE_ROOT, 'assets'),
 )
 
 # STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
-STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
+STATIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), "staticfiles")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")
