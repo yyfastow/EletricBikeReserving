@@ -5,12 +5,8 @@
             console.log("Forms ready to submit");
             var address = $("#mock-address").val();
             var card = $('select[name=mock-card] option:selected').val();
-            //alert(address);
-            //alert(card);
             $("#address-slot").children("#id_billing").val(address);
             $("#card-slot").children("#id_card").val(card);
-            //alert($("#id_billing").val());
-            //alert($("#id_card").val());
             $(this).parent("#main-form").submit();
             console.log("Forms submitted");
         });
@@ -18,6 +14,7 @@
         console.log("AJAX in line");
 
         $(".add-card-form").submit(function(event) {
+            // adds credit card
             event.preventDefault();
             formData = $(this).serialize();
             $.ajax({
@@ -34,12 +31,14 @@
                     $(".add-card-form").val("");
                 },
                 error: function(error) {
-                    alert("ERRROR< ERROR<ERROR");
+                    alert("Need to reload page!");
+                    // $(this).submit();
                 }
             })
         });
 
         $(".add-address-form").submit(function(event) {
+            // add's an address
             event.preventDefault();
             formData = $(this).serialize();
             $.ajax({
@@ -56,13 +55,15 @@
                     $(".add-address-form").val("");
                 },
                 error: function(error) {
-                    alert("ERRROR< ERROR<ERROR");
+                    // alert("Need to reload page.");
+                    // $(this).submit();
                 }
             })
         });
 
         // cart.html
         function transferToFloat(total) {
+            // removes the $ and the , from price to be able to convert it into a float
             new_total = "";
             for (i=0; i < 20; i++) {
                 asd = total.substring(i, i+1);
@@ -75,6 +76,7 @@
         }
 
         $(".sm-amount-form").submit(function(event) {
+            // changes amount on cart
             event.preventDefault();
 
             formData = $(this).serialize();
@@ -98,7 +100,7 @@
                     alert("Amount changed");
                 },
                 error: function (error) {
-                    alert("ERROR");
+                    // $(this).submit();
                 }
             })
             } else {
@@ -107,6 +109,7 @@
         });
 
         $(".remove-item-form").submit(function(event) {
+            // removes item from cart
             event.preventDefault();
             pk = $(this).children(".pk").val();
             formData = $(this).serialize();
@@ -125,13 +128,14 @@
                     $(".total-amount").text("$" + new_total + '.00');
                 },
                 error: function(error) {
-                    alert("NO");
+                    // $(this).submit();
                 }
             })
         });
 
         // edit_orders.html
         $(".edit-address-form").submit(function(event) {
+            // edit address
             event.preventDefault();
             formData = $(this).serialize();
             $Form = $(this);
@@ -151,13 +155,14 @@
                         alert("address edited");
                     },
                     error: function(error) {
-                        alert("Error");
+                        $Form.submit();
                     }
                 })
             }
         });
 
         $(".edit-card-form").submit(function(event) {
+            // ajax request for edited credit card info
             event.preventDefault();
             formData = $(this).serialize();
             $form = $(this).parent();
@@ -176,13 +181,14 @@
                     }
                 },
                 error: function(error) {
-                    alert("ERROR ERROR ERROR");
+                    // $(this).submit();
                 }
             })
         });
 
         // messages
         $(".delete-message").submit(function(event) {
+            // ajax request to delete message
             event.preventDefault();
             formData = $(this).serialize();
             pk = $(this).children(".pk").val();
@@ -196,7 +202,7 @@
                     alert("Message Deleted");
                 },
                 error: function(error) {
-                    alert("Error");
+                    // $(this).submit();
                 }
             })
         });
@@ -219,6 +225,7 @@
 
 
         $(".cancel-order").submit(function(event) {
+            // ajax request to cancel pacific order
             event.preventDefault();
             formData = $(this).serialize();
             pk = $(this).children(".pk").val();
@@ -239,7 +246,7 @@
                         $(".reload-page").show();
                     },
                     error: function(error) {
-                        alert("error");
+                        // $(this).submit();
                     }
                 });
             }
@@ -254,6 +261,7 @@
 
         // admin - message form
         $(".change-reservation-amount").submit(function(event) {
+            // change reservation
             event.preventDefault();
             formData = $(this).serialize();
             $pk = $(this).children(".pk");
@@ -342,6 +350,5 @@
                 }
             });
         });
-
     });
 </script>

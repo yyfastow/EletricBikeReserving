@@ -27,24 +27,24 @@
     <div class="row">
         {% if reservations %}
 
-            <h3 style="margin-right: 60%;">Reserved Bikes:</h3>
+            <h3 class="mr-60">Reserved Bikes:</h3>
             {% get_status 'reserved' as status %}
-            {% costomers reservations as bike_orders %}
+            {% customers reservations as bike_orders %}
             {% include 'bikes/admin_user_template.html' %}
 
         {% endif %}
         {% if shipping %}
 
-            <h3 style="margin-right: 60%;">Bikes Ready to ship:</h3>
+            <h3 class="mr-60">Bikes Ready to ship:</h3>
             {% get_status 'shipping' as status %}
-            {% costomers shipping as bike_orders %}
+            {% customers shipping as bike_orders %}
             {% include 'bikes/admin_user_template.html' %}
 
         {% endif %}
         {% if shipped %}
-            <h3 style="margin-right: 60%;">Bikes shipped: </h3>
+            <h3 class="mr-60">Bikes shipped: </h3>
             {% get_status 'shipped' as status %}
-            {% costomers shipped as bike_orders %}
+            {% customers shipped as bike_orders %}
             {% include 'bikes/admin_user_template.html' %}
         {% endif %}
     </div></div>

@@ -16,8 +16,10 @@
     {% if billings %}
             <h3>Addresses to deliver to</h3>
             {% for bill in billings %}
-                <div class="bill-form" style="display:inline-flex;">
-                <button class="button dropdownform-button" style="" id="address-button-{{ bill.pk }}">{{ bill.address }}, {{ bill.city }}, {{ bill.state }}, {{ bill.zip }}</button>
+                <div class="bill-form flex">
+                <button class="button dropdownform-button" id="address-button-{{ bill.pk }}">
+                    {{ bill.address }}, {{ bill.city }}, {{ bill.state }}, {{ bill.zip }}
+                </button>
                 <div class="row columns dropdownform">
                     {% get_bill_form bill as bill_form %}
                     <form action="{% url 'bikes:edit_address' %}" method="POST" class="edit-address-form">
@@ -28,15 +30,15 @@
                         {{ bill_form.zip }}
                         <input type="hidden" name="pk" class="hidden-pk" value="{{ bill.pk }}">
                         {% csrf_token %}
-                        <input type="submit" class="btn btn-success" style="margin-bottom: 5px;" value="save changes">
+                        <input type="submit" class="btn btn-success mb-5" value="save changes">
                     </form>
                 </div>
                 </div>
             {% endfor %}
             <h3>Credit cards</h3>
             {% for card in cards %}
-                <div class="card-form" style="display:inline-flex;">
-                <button class="button dropdownform-button" style="" id="card-button-{{ card.pk }}">{{ card }}</button>
+                <div class="card-form flex">
+                <button class="button dropdownform-button" id="card-button-{{ card.pk }}">{{ card }}</button>
                 <div class="row columns dropdownform">
                     {% get_card_form card as card_form %}
                     <form action="{% url 'bikes:edit_card' %}" method="POST" style="float: right;" class="edit-card-form">
@@ -46,14 +48,12 @@
                         {{ card_form.ccv_number }}
                         <input type="hidden" name="pk" class="pk" value="{{ card.pk }}">
                         {% csrf_token %}
-                        <input type="submit" class="btn btn-success" style="margin-bottom: 5px;" value="save changes">
+                        <input type="submit" class="btn btn-success mb-5" value="save changes">
                     </form>
-
                 </div>
                 </div>
             {% endfor %}
             </div>
     {% endif %}
-
     </div>
 {% endblock %}

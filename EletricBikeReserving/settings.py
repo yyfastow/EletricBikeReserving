@@ -11,9 +11,22 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+# import warnings
+#
+# from django.core.exceptions import ImproperlyConfigured
+#
+#
+# # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# def get_env_variables(var_name):
+#     try:
+#         return os.environ[var_name]
+#     except KeyError:
+#         error_msg = "Set the {} env variable".format(var_name)
+#         if DEBUG:
+#             warnings.warn(error_msg)
+#         else:
+#             raise ImproperlyConfigured(error_msg)
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from django.conf.global_settings import STATICFILES_DIRS
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -50,11 +63,11 @@ INSTALLED_APPS = [
 
 CART_PRODUCT_MODEL = 'products.models.Product'
 
-TEMPLATE_CONTEXT_PROCESSORS = {
-    'django.contrib.auth.context_processors.auth',
-#    'django.core.context_processors.request',
-    'django.contrib.messages.context_processors.messages',
-}
+# TEMPLATE_CONTEXT_PROCESSORS = {
+#     'django.contrib.auth.context_processors.auth',
+# #    'django.core.context_processors.request',
+#     'django.contrib.messages.context_processors.messages',
+# }
 
 # MIDDLEWARE_CLASSES = [
 MIDDLEWARE = [
@@ -140,12 +153,15 @@ PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 SITE_ROOT = PROJECT_ROOT
 
 STATICFILES_LOCATION = 'assets'
+MEDIAFILES_LOCATION = 'media'
+
+STATIC_URL = '/assets/'
 
 # MEDIA_ROOT = 'C:/Users/yosef/PycharmProjects/EletricBikeReserving/Bikes/media',
 # MEDIA_URL = '/media/'
 
 # STATIC_ROOT = os.path.join(SITE_ROOT, 'assets')
-STATIC_URL = '/assets/'
+
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
@@ -153,7 +169,9 @@ STATICFILES_DIRS = (
 )
 
 # STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), "static_cdn")
-STATIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), "staticfiles")
+# STATIC_ROOT = os.path.join(os.path.dirname(PROJECT_ROOT), "staticfiles")
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "staticfiles")
+# STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), "media_cdn")

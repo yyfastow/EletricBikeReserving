@@ -6,7 +6,7 @@
 
         <div class="row">
         <div class="col-sm-10 col-sm-offset-1">
-        <table style="width: 100%; border: 2px outset lightcyan;">
+        <table class="cart-table">
         <tr>
             <th>Product</th>
             <th>Quantity</th>
@@ -14,7 +14,9 @@
         </tr>
         {% for item in cart %}
         <tr>
-            <td><a href="{% url 'bikes:details' types_pk=item.bike.type.pk bike_pk=item.bike.pk %}">{{ item.bike }}</a></td>
+            <td>
+                <a href="{% url 'bikes:details' types_pk=item.bike.type.pk bike_pk=item.bike.pk %}">{{ item.bike }}</a>
+            </td>
             <td>{{ item.quantity }}</td>
             <td>{{ item.price }}</td>
         </tr>

@@ -9,7 +9,7 @@
         <h3>These items are ready to be shipped! ship them and mark as shipped</h3>
 
     {{ block.super }}
-        {% costomers preorders as people %}
+        {% customers preorders as people %}
         {% comment %}
             user_list[user] = {
                 order.order: {
@@ -22,25 +22,25 @@
             <div class="col-sm-8 col-sm-offset-1">
                 <div class="callout user-box">
                     <h5>{{ person.name }}</h5>
-                    <p style="margin-bottom: 5px;">Email: {{ person.email }}</p>
-                    <p style="margin-top: 5px;">Phone: {{ person.phone }}</p>
+                    <p class="mb-5">Email: {{ person.email }}</p>
+                    <p class="mt-5">Phone: {{ person.phone }}</p>
 
 
                     {% comment %} mark shipped url {% url 'bikes:mark shipped' pk=preorder.pk %}
                     Make the loop loop through all bikes ready to ship with the number of each bike and then loop through the billing addresses and the cards{% endcomment %}
 
                     {% for bike, info in bikes.items %}
-                    <div class="bike-box" style="border: solid lightgrey 1px; margin-bottom: 20px; margin-left: 10%; padding: 20px; background-color: #e4efdf">
+                    <div class="box bike-box">
                     <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image"/>
                     <h5>{{ bike.name }}</h5>
                     <p>{{ bike.type }}</p>
                     <p>Ordered {{ info.amount }} bike{% if info.amount > 1 %}s{% endif %}, Charged: {{ info.total }}</p>
-                    <div class="addresses" style="border: solid lightgrey 1px; margin-bottom: 20px; margin-left: 10%; padding: 20px; background-color: #d0e3ef">
-                        <h5 style="border-bottom: solid blue 1px;">Addresses</h5>
+                    <div class="box addresses">
+                        <h5 class="address-title">Addresses</h5>
                         {% for address, amount in info.billings.items %}
                             <div class="address">
                             <p>Ship {{ amount }} bike{% if amount > 1 %}s{% endif %} to: {{ address.address }} {{ address.city }} {{ address.state }} {{ address.zip }}</p>
-                            <form style="border-bottom: dashed blue 1px; padding-bottom: 10px;" method="post" class="mark-shipped-form" action="{% url 'bikes:mark shipped' %}">
+                            <form method="post" class="mark-shipped-form" action="{% url 'bikes:mark shipped' %}">
                                 <input type="hidden" name="address" class="address" value="{{ address.pk }}">
                                 <input type="hidden" name="user" class="user" value="{{ person.pk }}">
                                 <input type="hidden" name="bike" class="bike" value="{{ bike.pk }}">
@@ -59,9 +59,8 @@
                             <p style="border-bottom: dashed brown 1px;">    CCV number: {{ card.ccv_number }}</p>
                             </div>
                         {% endfor %}
-                        {% comment %}<li><a href="{% url 'bikes:users_orders' pk=preorder.user_info.pk %}">See Costomer account</a></li>{% endcomment %}
                     </div>
-                        </div>
+                    </div>
                         {% endfor %}
                     <a href="#" class="button">Mark as Shipped!</a>
                 </div>
@@ -85,4 +84,6 @@
     {%  endfor %}
     {% endif %}
     </div>
+
+    {% include 'ajax.html' %}
 {% endblock %}

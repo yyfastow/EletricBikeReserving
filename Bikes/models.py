@@ -24,7 +24,6 @@ class Bikes(models.Model):
                        default_currency='USD',
                        )
 
-
     motor = models.CharField(null=True, blank=True, max_length=100)
     battery = models.CharField(null=True, blank=True, max_length=100)
     PAS = models.CharField(null=True, blank=True, max_length=100)
@@ -57,10 +56,8 @@ class Bikes(models.Model):
     pedal = models.CharField(null=True, blank=True, max_length=100)
     packaging_size = models.CharField(null=True, blank=True, max_length=100)
 
-
     orders_needed = models.IntegerField(default=5)
     orders = models.IntegerField(default=0)
-
 
     def get_absolute_url(self):
         from django.core.urlresolvers import reverse
@@ -75,10 +72,9 @@ class Bikes(models.Model):
 
 class Order(models.Model):
     total_charge = MoneyField(max_digits=7,
-                       decimal_places=2,
-                       default_currency='USD'
-                       )
-    # charged = models.FloatField(default=0)
+                              decimal_places=2,
+                              default_currency='USD'
+                              )
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
     phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$', message="Phone Number")
@@ -89,7 +85,7 @@ class Order(models.Model):
 
 
 class Billing(models.Model):
-    DEFAULT_PK=1
+    DEFAULT_PK = 1
     user_info = models.ForeignKey(Order, default=DEFAULT_PK)
     state = USStateField()
     city = models.CharField(max_length=25)
@@ -101,19 +97,17 @@ class Billing(models.Model):
 
 
 class Card(models.Model):
-    DEFAULT_PK=1
+    DEFAULT_PK = 1
     user_info = models.ForeignKey(Order, default=DEFAULT_PK)
     number = models.IntegerField("Credit Card Number")
     expiration = models.DateTimeField()
     ccv_number = models.IntegerField("CCV Number")
-                                    # validators=([MaxValueValidator(9999)]))
-
+    # validators=([MaxValueValidator(9999)]))
     # , widget = forms.TextInput(attrs={'size': '4'})
 
     def __str__(self):
-        str = "{}".format(self.number)
-        return "****-****-****-{}".format(str[-4:])
-
+        stri = "{}".format(self.number)
+        return "****-****-****-{}".format(stri[-4:])
 
 
 class Preorders(models.Model):

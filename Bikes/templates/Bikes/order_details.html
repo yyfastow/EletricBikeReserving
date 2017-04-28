@@ -24,13 +24,14 @@
     <div class="old-data">
     {% for address, amount in addresses.items %}
             <h3>{{ amount }} {{ bike }}'s are being shipped to {{ address }}. </h3>
-                <div class="x" style="display: block;">
-                <div class="bill-form" style="display:inline-flex;">
+                <div class="x block">
+                <div class="bill-form flex">
                 <button class="btn btn-primary dropdownform-button">Edit Address</button>
 
                 <div class="row columns  dropdownform">
                     {% get_bill_form address as bill_form %}
-                    <form action="{% url 'bikes:edit_address' %}" method="POST" class="edit-address-form inserted-form" style="margin: 0">
+                    <form action="{% url 'bikes:edit_address' %}" method="POST"
+                          class="edit-address-form inserted-form m-0">
                         {{ bill_form.management_form }}
                         {{ bill_form.address }}
                         {{ bill_form.city }}
@@ -38,17 +39,21 @@
                         {{ bill_form.zip }}
                         <input type="hidden" name="pk" class="hidden-pk" value="{{ address.pk }}">
                         {% csrf_token %}
-                        <input type="submit" class="btn btn-success" style="margin-bottom: 5px;" value="edit address and all order's with this address.">
+                        <input type="submit" class="btn btn-success mb-5"
+                               value="edit address and all order's with this address.">
                     </form>
                 </div></div></div>
     {% endfor %}
-    <div class="change-bill" style="margin-top: 10px; display: inline-flex;">
+
+    <!-- change addresses form -->
+    <div class="change-bill mt-10 flex">
     <button class="btn btn-success dropdownform-button">Change Addresses</button>
-    <form name="change-bill-form" action="{% url 'bikes:change_address' %}" method="post" class="dropdownform change-bill-form inserted-form" style="margin: 0; background-color: #daffd6; min-width: 80%; max-width: 90%;">
+    <form name="change-bill-form change-form" action="{% url 'bikes:change_address' %}" method="post"
+          class="dropdownform change-bill-form inserted-form m-0">
         <div class="all-addresses-form" style="text-decoration: none;">
         <input type="hidden" name="orders" value="{% for address in orders %}{{ address.pk }} {% endfor %}">
         {% for address in orders %}
-            <select name="billing{{ address.pk }}" class="billing" id="billing-for-{{ address.pk }}" style="max-width: 300px;">
+            <select name="billing{{ address.pk }}" class="billing select" id="billing-for-{{ address.pk }}">
                 <option value="" selected="selected">-------</option>
                 {% for bill in bills %}
                     <option value="{{ bill.pk }}">{{ bill }}</option>
@@ -57,19 +62,24 @@
         {% endfor %}
         {% csrf_token %}
         </div>
-        <input type="submit" class="btn btn-info" style="margin-bottom: 10px;">
+        <input type="submit" class="btn btn-info mb-10">
     </form>
     </div>
+
+    <!-- Card charged -->
     {% for card, price in cards.items %}
         <h3>We will charge {{ card }} {{ price }}!</h3>
     {% endfor %}
-    <div class="change-card" style="display: inline-flex">
+    <div class="change-card flex">
+
+    <!-- Change cards form -->
     <button class="btn btn-success dropdownform-button">Change Cards</button>
-    <form name="change-card-form" action="{% url 'bikes:change_card' %}" method="post" class="dropdownform inserted-form" style="margin: 0; background-color: #daffd6; min-width: 80%; max-width: 90%;">
+    <form name="change-card-form" action="{% url 'bikes:change_card' %}" method="post"
+          class="dropdownform inserted-form m-0 change-form">
         <div class="all-card-form" style="text-decoration: none;">
         <input type="hidden" name="orders" value="{% for card in orders %}{{ card.pk }} {% endfor %}">
         {% for order in orders %}
-            <select name="card{{ order.pk }}" class="card" id="card-for-{{ order.pk }}" style="max-width: 300px;">
+            <select name="card{{ order.pk }}" class="card select" id="card-for-{{ order.pk }}">
                 <option value="" selected="selected">-------</option>
                 {% for card in credit_cards %}
                     <option value="{{ card.pk }}">{{ card }}</option>
@@ -78,13 +88,14 @@
         {% endfor %}
         {% csrf_token %}
         </div>
-        <input type="submit" class="btn btn-info" style="margin-bottom: 10px;">
+        <input type="submit" class="btn btn-info mb-10">
     </form>
     </div></div>
-    <h4 class="reload-page" style="font-family: cursive; border: black solid 1px; display: none; padding: 5px; padding-top: 0;">Reload the page to see changes </h4>
 
-    <button class="btn btn-danger dropdownform-button" style="margin-top: 10px; display: block;">Cancel/Change Order</button>
-        <table class="dropdownform" style="max-width: 100%;">
+    <!-- cancel form -->
+    <h4 class="reload-page" style="display: none;">Reload the page to see changes </h4>
+    <button class="btn btn-danger dropdownform-button mt-10 block">Cancel/Change Order</button>
+        <table class="dropdownform no-overflow">
         <tr>
             <th>Product</th>
             <th>Address</th>
@@ -110,6 +121,9 @@
         <input type="submit" class="btn btn-danger cancel-all-orders-button" value="Cancel all orders">
     </form>
 
-    </div></div></div></div>
+    </div>
+    </div>
+    </div>
+    </div>
 
 {% endblock %}

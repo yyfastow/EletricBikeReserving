@@ -6,11 +6,11 @@
     <div class="row">
         {% for order in orders %}
             {% if order.name != "Anonymous" %}
-                <div class="small-6 columns">
+                <div class="col-sm-6 col-xs-10">
                     <div class="callout">
-                        <h5>Name: {{ order.name }}</h5>
-                            <p style="margin-bottom: 5px;">Email: {{ order.email }}</p>
-                            <p style="margin-bottom: 5px;">Phone: {{ order.phone }}</p>
+                        <h4>Name: {{ order.name }}</h4>
+                            <p class="mb-5">Email: {{ order.email }}</p>
+                            <p class="mb-5">Phone: {{ order.phone }}</p>
                             <p>total to charge: {{ order.total_charge }}</p>
                             <button class="dropdownform-button btn btn-primary">Message {{ order.name }}</button>
                             <div class="inserted-form dropdownform" style="display: none">
@@ -26,7 +26,7 @@
                                 </form>
                             </div>
                             <a href="{% url 'bikes:users_orders' pk=order.pk %}"
-                               class="button" style="margin-top: 10px;">See all orders from {{ order }}</a>
+                               class="button mt-10">See all orders from {{ order }}</a>
 
                     </div>
                 </div>

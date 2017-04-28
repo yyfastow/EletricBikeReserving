@@ -4,8 +4,7 @@
     <div class="row">
         <h3 >{{ bike.name }} <small style="color: brown">{{ bike.type }} - {{ bike.price }}</small></h3>
 
-        <img style="display: block; margin-left: auto; margin-right: auto;" src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image_display"/>
-        <p></p>
+        <img src="{{ bike.picture.url }}" alt="picture of {{ bike }} bike" class="bike_image_display block"/>
         <p>{{ bike.description }}</p>
         <div class="form_seperator">
             {% block details %}{% endblock %}

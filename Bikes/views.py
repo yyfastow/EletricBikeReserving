@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
@@ -29,7 +29,7 @@ def email_name_unique(request, name, email, user=None):
     elif users_name and user not in users_name:
         messages.error(
             request,
-            "This name is already used by another costomer"
+            "This name is already used by another costumer"
         )
         return False
     else:
@@ -54,7 +54,7 @@ def bike_list(request, pk):
 
 def bike_details(request, types_pk, bike_pk):
     """ show all bikes details. As a costumer there is a button to add bike to cart. If you are a new customer there's a
-    form on bottom to make a new account before adding to cart. For admin theres a list of all orders on that bike."""
+    form on bottom to make a new account before adding to cart. For admin there's a list of all orders on that bike."""
     bike = get_object_or_404(models.Bikes, type_id=types_pk, pk=bike_pk)
     more = bike.orders_needed - bike.orders
     form = forms.OrderForm(request.POST or None)
@@ -384,10 +384,10 @@ def edit_order(request):
     form = forms.EditInfoForm(instance=order)
     billing = models.Billing.objects.filter(user_info=order)
     card = models.Card.objects.filter(user_info=order)
-    card_form = forms.CardFormSet(queryset=card)
+    # card_form = forms.CardFormSet(queryset=card)
     if request.method == 'POST':
         form = forms.EditInfoForm(request.POST, instance=order)
-        card_form = forms.CardFormSet(request.POST, queryset=card)
+        # card_form = forms.CardFormSet(request.POST, queryset=card)
         if form.is_valid() and email_name_unique(request, form.cleaned_data['name'],
                                                  form.cleaned_data['email'], user):
             form.save()
@@ -405,7 +405,8 @@ def edit_order(request):
             )
             login(request, new_user_info)
             return HttpResponseRedirect(reverse('bikes:user'))
-    return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form, 'card_form': card_form,
+    return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form,
+                                                     # 'card_form': card_form,
                                                      'billings': billing, 'cards': card})
 
 
@@ -602,6 +603,7 @@ def first_checkout(request):
                 bike.save()
                 if bike.orders >= bike.orders_needed:
                     anought_orders(request, bike)
+                item.delete(keep_parents=True)
         messages.add_message(request, messages.SUCCESS, "Your order is sent!")
         return HttpResponseRedirect(reverse('bikes:user'))
     return render(request, 'bikes/order_form.html', {
@@ -824,7 +826,7 @@ def shipping_order(request):
 def recieved_order(request, pk):
     """ admin confirms that item is sent and marks it as reseived"""
     preorder = models.Preorders.objects.get(pk=pk)
-    preorder.status = 'recieved'
+    preorder.status = 'received'
     preorder.save()
-    messages.add_message(request, messages.SUCCESS, "Marked as revieved")
+    messages.add_message(request, messages.SUCCESS, "Marked as received")
     return HttpResponseRedirect(reverse('bikes:shipping'))

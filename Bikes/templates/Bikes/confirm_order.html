@@ -1,13 +1,6 @@
 {% extends "cart/cart_chart.html" %}
 
 {% block title %}Order {% endblock %}
-<style>
-{% block javascript %}
-
-
-{% endblock %}
-</style>
-
 
 {% block order_form %}
     <div class="row ">
@@ -18,7 +11,7 @@
                 <h4>Total charge: {{ total_amount }}</h4>
                 <p>where to ship</p>
                 <form action="" method="post">
-                    <select class="element select small" id="mock-address" name=mock-address" style="max-width: 70%;">
+                    <select class="element select small" id="mock-address" name=mock-address">
                         <option value="0" class="zero" selected="selected">----</option>
                         {% for address in addresses %}
                             <option class="zero" value="{{ address.pk }}">{{ address }}</option>
@@ -40,7 +33,7 @@
             <div class="right">
 
                 <p>Credit Card</p>
-                    <select id="mock-card" name="mock-card" style="max-width: 70%;">
+                    <select id="mock-card" name="mock-card">
                         <option value="0" selected="selected">----</option>
                         {% for card in cards %}
                             <option value="{{ card.pk }}">{{ card }}</option>
@@ -57,7 +50,6 @@
                     </form>
                 </div>
             </div>
-
 
             <div class="submit_seperator">
                 <form action="" method="POST" id="main-form">

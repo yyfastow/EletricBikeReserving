@@ -8,11 +8,10 @@
     <div class="row">
 
     <div class="col-sm-10 col-sm-offset-1">
-    <div class="row">
 
         <p>Total that you will be charged:  {{ order.total_charge }}</p>
         {% if preorders %}
-            <h3>These are the bikes {{ user.username }} ordered:</h3>
+            <h3>These are the bikes you ordered:</h3>
         {% else %}
             <h3>No bikes are reserved now!</h3>
         {% endif %}
@@ -33,6 +32,7 @@
                 </div>
             </div>
         {%  endfor %}
+    </div>
     </div>
 
          {% if shipping or shipped %}
@@ -58,6 +58,4 @@
          {% else %}
               <div><h3>No bikes are ready to ship yet!</h3></div>
          {% endif %}
-    </div>
-    </div>
 {% endblock %}
