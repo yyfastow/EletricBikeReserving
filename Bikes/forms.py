@@ -161,7 +161,7 @@ class CardForm(forms.ModelForm):
                 "Your credit card is expired."
             )
 
-        if (number and (len(str(number)) < 13 or len(str(number)) > 16)) or (ccv_number and len(str(ccv_number)) > 4):
+        if (number and (len(str(number)) < 13 or len(str(number)) > 16)) or (ccv_number and len(str(ccv_number)) > 4 ):
             raise forms.ValidationError(
                 "Credit Card invalid!"
             )
@@ -211,8 +211,8 @@ class SelectionForm(forms.Form):
 
 class LoginForm(forms.Form):
     """ Form to login user """
-    name = forms.CharField(max_length=100, label="name  ")
-    email = forms.EmailField(max_length=254, label="Email:  ")
+    name = forms.CharField(max_length=100, label="Name")
+    email = forms.EmailField(max_length=254, label="Email:")
     password = forms.CharField(widget=forms.PasswordInput)
     honeypot = forms.CharField(required=False,
                                widget=forms.HiddenInput,

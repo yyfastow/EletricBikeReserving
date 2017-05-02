@@ -19,6 +19,14 @@ def amount_items_in_cart(user):
 
 
 @register.assignment_tag
+def amount_messages(user):
+    user_profile = models.Order.objects.get(name=user.username, email=user.email)
+    messages = models.Message.objects.filter(user=user_profile, owner='from')
+    amount = len(messages)
+    return amount
+
+
+@register.assignment_tag
 def customers(reservations):
     """ for superuser to see all reservations on one bike """
     user_list = {}
@@ -108,11 +116,11 @@ def orders_by_address(orders, user):
     bike_list = {}
     for order in orders:
         try:
-            bike = models.Billing.objects.get(address=order.address.address, user_info=user)
-            if bike not in bike_list:
-                bike_list[bike] = 1
+            billing = models.Billing.objects.get(address=order.address.address, user_info=user)
+            if billing not in bike_list:
+                bike_list[billing] = 1
             else:
-                bike_list[bike] += 1
+                bike_list[billing] += 1
         except:
             pass
     return bike_list

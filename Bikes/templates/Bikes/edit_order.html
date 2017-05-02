@@ -14,7 +14,7 @@
             <input type="submit" class="button" value="Update">
         </form>
     {% if billings %}
-            <h3>Addresses to deliver to</h3>
+            <h3>Addresses</h3>
             {% for bill in billings %}
                 <div class="bill-form flex">
                 <button class="button dropdownform-button" id="address-button-{{ bill.pk }}">
@@ -34,7 +34,27 @@
                     </form>
                 </div>
                 </div>
-            {% endfor %}
+            {% endfor %}{% endif %}
+                <button class="button new-address" style="display: none"></button>
+                <div class="x block">
+                <div class="bill-form flex">
+                <button class="btn btn-primary dropdownform-button">Add Address</button>
+                <div class="row columns  dropdownform">
+                    {% get_bill_form None as bill_form %}
+                    <form action="{% url 'bikes:add_address' %}" method="POST"
+                          class="add-address-form inserted-form m-0">
+                        {{ bill_form.management_form }}
+                        <input id="id_address" maxlength="100" name="address" type="text" placeholder="address" required />
+                        <input id="id_city" maxlength="25" name="city" type="text" placeholder="city" required />
+                        {{ bill_form.state }}
+                        <input id="id_zip" maxlength="10" name="zip" type="text" placeholder="zip" required />
+                        <input type="hidden" name="new" class="new" value="new">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-success mb-5"
+                               value="add address">
+                    </form>
+                </div></div></div>
+            {% if cards %}
             <h3>Credit cards</h3>
             {% for card in cards %}
                 <div class="card-form flex">
@@ -53,7 +73,25 @@
                 </div>
                 </div>
             {% endfor %}
-            </div>
+
     {% endif %}
-    </div>
+    <button class="button new-card" style="display: none"></button>
+                <div class="x block">
+                <div class="bill-form flex">
+                <button class="btn btn-primary dropdownform-button">Add Card</button>
+                <div class="row columns dropdownform">
+                    {% get_card_form None as card_form %}
+                    <form action="{% url 'bikes:add_card' %}" method="POST"
+                          class="add-card-form inserted-form m-0">
+                        {{ card_form.management_form }}
+                        <input id="id_number" name="number" type="number" placeholder="credit card number" required />
+                        {{ card_form.expiration }}
+                        <input id="id_ccv_number" name="ccv_number" size="4" type="text" placeholder="ccv" required />
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-success mb-5"
+                               value="add card">
+                    </form>
+                </div></div></div>
+
+    </div></div>
 {% endblock %}

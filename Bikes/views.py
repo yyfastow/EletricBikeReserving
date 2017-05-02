@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -200,6 +202,7 @@ def add_address(request):
                 if next:
                     return redirect(next)
                 return HttpResponseRedirect(reverse('bikes:user'))
+
     return render(request, 'bikes/add.html', {'form': form})
 
 
@@ -211,7 +214,10 @@ def change_address(request):
         return admin_orders(request)
     order = models.Order.objects.filter(name=user.username, email=user.email)
     orders = request.POST.get("orders")
-    orders = orders.split(" ")
+    try:
+        orders = orders.split(" ")
+    except AttributeError:
+        return HttpResponseRedirect(reverse('bikes:edit'))
     del orders[-1]
     print(orders)
     for item in orders:
@@ -232,7 +238,10 @@ def edit_address(request):
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    bill = models.Billing.objects.get(pk=request.POST.get('pk'))
+    pk = request.POST.get('pk')
+    if not pk:
+        return HttpResponseRedirect(reverse('bikes:edit'))
+    bill = models.Billing.objects.get(pk=pk)
     if bill.user_info.email != user.email and bill.user_info != user.username:
         return users_orders(request)
     form = forms.BillingForm(instance=bill)
@@ -259,8 +268,10 @@ def edit_card(request):
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
-    or_user = models.Order.objects.get(name=user.name, email=user.email)
+    or_user = models.Order.objects.get(name=user.username, email=user.email)
     pk = request.POST.get('pk')
+    if not pk:
+        return HttpResponseRedirect(reverse('bikes:edit'))
     card = models.Card.objects.get(pk=pk, user_info=or_user)
     print(pk)
     form = forms.CardForm(instance=card)
@@ -275,10 +286,13 @@ def edit_card(request):
                 return JsonResponse({'card': text, 'error': 'good'})
             else:
                 messages.add_message(request, messages.SUCCESS, "Credit card edited!")
-                return HttpResponseRedirect(reverse('bikes:user'))
+                return HttpResponseRedirect(reverse('bikes:edit'))
         else:
+            expiration = form.cleaned_data['expiration']
             if request.is_ajax():
-                err = "Card is not valid"
+                err = "Card is invalid. Use another credit card or make sure you put in the data correctly."
+                if expiration <= datetime.now().date():
+                    err = "Your card is expired!"
                 return JsonResponse({'error': err})
             else:
                 messages.error(request, "Didn't edit!")
@@ -292,7 +306,10 @@ def change_card(request):
         return admin_orders(request)
     order = models.Order.objects.filter(name=user.username, email=user.email)
     orders = request.POST.get("orders")
-    orders = orders.split(" ")
+    try:
+        orders = orders.split(" ")
+    except AttributeError:
+        return HttpResponseRedirect(reverse('bikes:edit'))
     del orders[-1]
     print(orders)
     for item in orders:
@@ -372,6 +389,14 @@ def add_card(request):
                 if next:
                     return redirect(next)
                 return HttpResponseRedirect(reverse('bikes:checkout'))
+        else:
+            if request.is_ajax():
+                err = "Card is invalid. Use another credit card or make sure you put in the data correctly."
+                if form.cleaned_data['expiration'] <= datetime.now().date():
+                    err = 'Your card has expired.'
+                return JsonResponse({
+                    'error': err
+                })
     return render(request, 'bikes/add.html', {'form': form})
 
 
@@ -404,7 +429,7 @@ def edit_order(request):
                 email=form.cleaned_data['email']
             )
             login(request, new_user_info)
-            return HttpResponseRedirect(reverse('bikes:user'))
+            return HttpResponseRedirect(reverse('bikes:edit'))
     return render(request, 'bikes/edit_order.html', {'user': user, 'order': order, 'form': form,
                                                      # 'card_form': card_form,
                                                      'billings': billing, 'cards': card})
@@ -533,6 +558,8 @@ def cancel_order(request):
     if user.is_superuser:
         return admin_orders(request)
     pk = request.POST.get('pk')
+    if not pk:
+        return HttpResponseRedirect(reverse('bikes:edit'))
     order = models.Order.objects.get(name=user.username, email=user.email)
     preorder = models.Preorders.objects.get(pk=pk, status="reserved", user_info=order)
     bike = models.Bikes.objects.get(name=preorder.order)
@@ -554,11 +581,13 @@ def cancel_order(request):
 
 @login_required()
 def cancel_all_orders(request):
-    """ cancel an order of a posific bike"""
+    """ cancel an order of a pacific bike"""
     user = request.user
     if user.is_superuser:
         return admin_orders(request)
     pk = request.POST.get('pk')
+    if not pk:
+        return HttpResponseRedirect(reverse('bikes:edit'))
     order = models.Order.objects.get(name=user.username, email=user.email)
     bike = models.Bikes.objects.get(pk=pk)
     preorders = models.Preorders.objects.filter(user_info=order, order=bike, status="reserved")
@@ -699,8 +728,10 @@ def checkout(request):
 
 
 # Admin views
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def change_reservation_amount(request):
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     pk = request.POST.get('pk')
     amount = int(request.POST.get('amount'))
     bike = models.Bikes.objects.get(pk=pk)
@@ -719,16 +750,20 @@ def change_reservation_amount(request):
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def admin_orders(request):
-    """admin could see all costomers"""
+    """admin could see all costumers"""
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     orders = models.Order.objects.all()
     return render(request, 'bikes/all_orders.html', {'orders': orders})
 
 
-@user_passes_test(lambda user: user.is_superuser)
+login_required()
 def admin_user_preorders(request, pk):
     """admin could see all orders by person """
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     order = models.Order.objects.get(pk=pk)
     reserved = models.Preorders.objects.filter(user_info=order, status="reserved")
     shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
@@ -745,17 +780,21 @@ def admin_user_preorders(request, pk):
 #     return render(request, 'bikes/templatetags/orders_list.html', {'bike': bike, 'preorders': preorders})
 
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def orders_ready_to_ship(request):
     """admin sees all items ready to ship"""
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     preorders = models.Preorders.objects.filter(status="shipping")
     shipped = models.Preorders.objects.filter(status="shipped")
     return render(request, 'bikes/orders_shiping.html', {'preorders': preorders, 'shipped': shipped})
 
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def admin_send_message(request):
     """ form for admin to send a message to a costumer"""
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     pk = request.POST.get('pk')
     order = get_object_or_404(models.Order, pk=pk)
     message = forms.MessageForm()
@@ -772,9 +811,11 @@ def admin_send_message(request):
     return render(request, 'admin_messages.html', {'message': message, 'order': order})
 
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def shipping_order(request):
     """ admin confirms that item is sent and marks it as shipped"""
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     address = models.Billing.objects.get(pk=request.POST.get('address'))
     user = models.Order.objects.get(pk=request.POST.get('user'))
     bike = models.Bikes.objects.get(pk=request.POST.get('bike'))
@@ -822,9 +863,11 @@ def shipping_order(request):
     return HttpResponseRedirect(reverse('bikes:type'))
 
 
-@user_passes_test(lambda user: user.is_superuser)
+@login_required()
 def recieved_order(request, pk):
-    """ admin confirms that item is sent and marks it as reseived"""
+    """ admin confirms that item is sent and marks it as received"""
+    if not request.user.is_superuser:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     preorder = models.Preorders.objects.get(pk=pk)
     preorder.status = 'received'
     preorder.save()

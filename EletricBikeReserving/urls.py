@@ -29,8 +29,8 @@ urlpatterns = [
     url(r'login/$', views.loginer, name='login'),
     url(r'accounts/login/$', views.loginer, name='login'),
     url(r'logout/$', views.logout_view, name='logout'),
-    url(r'message/$', views.message, name="message"),
-    url(r'^delete/$', views.delete_message, name="delete"),
+    url(r'^message/$', views.message, name="message"),
+    url(r'^delete message/$', views.delete_message, name="delete"),
     url(r'register/(?P<pk>\d+)/$', register, name='register'),
 
     url(r'^bikes/', include('Bikes.urls', namespace='bikes')),

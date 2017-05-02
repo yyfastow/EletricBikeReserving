@@ -23,15 +23,17 @@
     <div class="">
     <div class="old-data">
     {% for address, amount in addresses.items %}
-            <h3>{{ amount }} {{ bike }}'s are being shipped to {{ address }}. </h3>
+                <h3>{{ amount }} {{ bike }}'s is being shipped to <span id="address-title-{{ address.pk }}">{{ address }}</span>. </h3>
                 <div class="x block">
                 <div class="bill-form flex">
                 <button class="btn btn-primary dropdownform-button">Edit Address</button>
 
                 <div class="row columns  dropdownform">
+
                     {% get_bill_form address as bill_form %}
                     <form action="{% url 'bikes:edit_address' %}" method="POST"
                           class="edit-address-form inserted-form m-0">
+                        <p>Edit this address and all order's with this address</p>
                         {{ bill_form.management_form }}
                         {{ bill_form.address }}
                         {{ bill_form.city }}
@@ -40,7 +42,7 @@
                         <input type="hidden" name="pk" class="hidden-pk" value="{{ address.pk }}">
                         {% csrf_token %}
                         <input type="submit" class="btn btn-success mb-5"
-                               value="edit address and all order's with this address.">
+                               value="edit address.">
                     </form>
                 </div></div></div>
     {% endfor %}
@@ -68,7 +70,25 @@
 
     <!-- Card charged -->
     {% for card, price in cards.items %}
-        <h3>We will charge {{ card }} {{ price }}!</h3>
+        <h3>We will charge <span id="card-title-{{ card.pk }}">{{ card }}</span> {{ price }}!</h3>
+        <div class="x block">
+                <div class="bill-form flex" style="margin-bottom: 10px;">
+                <button class="btn btn-primary dropdownform-button">Edit Card</button>
+                <div class="row columns dropdownform">
+                    {% get_card_form card as card_form %}
+                    <form action="{% url 'bikes:edit_card' %}" method="POST"
+                          class="edit-card-form inserted-form m-0">
+                        <p>Edit this card and all order's with this card</p>
+                        {{ card_form.management_form }}
+                        {{ card_form.number }}
+                        {{ card_form.expiration }}
+                        {{ card_form.ccv_number }}
+                        <input type="hidden" name="pk" class="pk" value="{{ card.pk }}">
+                        {% csrf_token %}
+                        <input type="submit" class="btn btn-success mb-5" value="edit cards">
+                    </form>
+                </div>
+                </div></div>
     {% endfor %}
     <div class="change-card flex">
 

@@ -74,6 +74,7 @@ def message(request):
             form.user = order
             form.owner = "to"
             form.save()
+            messages.success(request, "Message sent! We will respond shortly.")
             return HttpResponseRedirect(reverse('home'))
     return render(request, 'admin_messages.html', {'message': message})
 

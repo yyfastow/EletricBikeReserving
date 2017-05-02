@@ -22,13 +22,18 @@
                 url: "{% url 'bikes:add_card' %}",
                 data: formData,
                 success: function(data) {
-                    alert("card_added");
-                    console.log(data);
-                    newCard = '<option value="' + data.pk + '" selected>' + data.new_text + '</option>';
-                    $("#mock-card").prepend(newCard);
-                    $("#id_card").prepend(newCard);
-                    $(".add-card-form-div").hide();
-                    $(".add-card-form").val("");
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        alert("card_added");
+                        console.log(data);
+                        newCard = '<option value="' + data.pk + '" selected>' + data.new_text + '</option>';
+                        $("#mock-card").prepend(newCard);
+                        $("#id_card").prepend(newCard);
+                        $(".new-card").text(data.new_text).show();
+                        $(".add-card-form-div").hide();
+                        $(".add-card-form").val("");
+                    }
                 },
                 error: function(error) {
                     alert("Need to reload page!");
@@ -41,6 +46,10 @@
             // add's an address
             event.preventDefault();
             formData = $(this).serialize();
+            zipCode = $(this).children("#id_zip").val();
+            if (zipCode.length != 5 && zipCode.length != 10) {
+                alert("Enter a zip code in the format XXXXX or XXXXX-XXXX.");
+            } else {
             $.ajax({
                 type: "POST",
                 url: "{% url 'bikes:add_address' %}",
@@ -51,14 +60,17 @@
                     newAddress = '<option value="' + data.pk + '" selected>' + data.new_text + '</option>';
                     $("#mock-address").prepend(newAddress);
                     $("#id_billing").prepend(newAddress);
+                    $(".new-address").text(data.new_text).show();
                     $(".add-address-form-div").hide();
                     $(".add-address-form").val("");
+
                 },
                 error: function(error) {
                     // alert("Need to reload page.");
                     // $(this).submit();
                 }
             })
+            }
         });
 
         // cart.html
@@ -152,6 +164,7 @@
                     success: function(data) {
                         $Form.parent().hide();
                         $("#address-button-"+pk).text(data.text);
+                        $("#address-title-"+pk).text(data.text);
                         alert("address edited");
                     },
                     error: function(error) {
@@ -175,7 +188,8 @@
                     if (data.error == "good") {
                         $form.hide();
                         $("#card-button-" + pk).text(data.card);
-                        alert("Card changed");
+                        $("#card-title-"+pk).text(data.card);
+                        alert("Card info edited!");
                     } else {
                         alert(data.error);
                     }
@@ -210,14 +224,14 @@
         // order_detail.html
         $firstAddrress = $(".all-addresses-form").children(".billing").first();
         $firstAddrress.change(function() {
-            alert($firstAddrress.val());
+            // alert($firstAddrress.val());
             $(".billing").val($firstAddrress.val());
             // $("#id_billing option:selected");
         });
 
         $firstCard = $(".all-card-form").children(".card").first();
         $firstCard.change(function() {
-            alert($firstCard.val());
+            // alert($firstCard.val());
             $(".card").val($firstCard.val());
             // $("#id_billing option:selected");
         });

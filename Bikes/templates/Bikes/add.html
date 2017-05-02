@@ -3,12 +3,12 @@
 {% block title %} edit a {{ form }}{% endblock %}
 
 {% block content %}
-    <div class="row columns">
+    <div class="row"><div class="col-sm-8 col-sm-offset-1">
         <h3>{% if not form.instance.pk %}Add{% else %}Edit {% endif %}</h3>
         <form action="" method="POST">
             {{ form.as_p }}
             {% csrf_token %}
             <input type="submit" class="button" value="add">
         </form>
-    </div>
+    </div></div>
 {% endblock %}

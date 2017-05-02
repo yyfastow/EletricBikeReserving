@@ -21,7 +21,7 @@
                 </form>
 
                 <button type="button" class="button dropdownform-button">Add another address</button>
-                <div class="inserted-form dropdownform" style="display: none;">
+                <div class="inserted-form dropdownform add-address-form-div" style="display: none;">
                     <form action="{% url 'bikes:add_address' %}" class="add-address-form" method="POST">
                         {{ add_address }}
                         {% csrf_token %}
