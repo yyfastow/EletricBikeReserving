@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath ChatBox ChatBox.deploy --log-file -
+web: gunicorn --pythonpath ElectricBikeReserving ElectricBikeReserving.deploy --log-file -
