@@ -96,9 +96,13 @@
 
 <div class="useless"></div>
 <div id="content">
+    <div class="row">
     {% if user.is_superuser %}
-        <div class="row"><h1>Admin</h1></div>
+            <h1>Admin</h1>
+
     {% endif %}
+        <h4><strong>WARNING:</strong> This site is only a demo you can't really buy anything.</h4>
+    </div>
     {% block content %}{% endblock %}
     {% include 'ajax.html' %}
 </div>
