@@ -17,15 +17,20 @@ import os
 #
 #
 # # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-# def get_env_variables(var_name):
-#     try:
-#         return os.environ[var_name]
-#     except KeyError:
-#         error_msg = "Set the {} env variable".format(var_name)
-#         if DEBUG:
-#             warnings.warn(error_msg)
-#         else:
-#             raise ImproperlyConfigured(error_msg)
+import warnings
+
+from django.core.exceptions import ImproperlyConfigured
+
+
+def get_env_variables(var_name):
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        error_msg = "Set the {} env variable".format(var_name)
+        if DEBUG:
+            warnings.warn(error_msg)
+        else:
+            raise ImproperlyConfigured(error_msg)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

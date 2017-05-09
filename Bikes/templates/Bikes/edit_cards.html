@@ -8,6 +8,7 @@
         <form action="" method="POST">
             {% csrf_token  %}
             <section>
+                <p><strong>WARNING: Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
                 {% for card in credit_cards %}
                     <p>card {{ num }}</p>
                     {{ card }}

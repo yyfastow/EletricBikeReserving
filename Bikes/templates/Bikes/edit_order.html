@@ -7,7 +7,7 @@
 {% block content %}
     <div class="row">
     <div class="col-sm-8 col-sm-offset-1">
-        <h3>{% if billings %}Edit info{% else %}Change Password{% endif %}</h3>
+        <h3>Edit info</h3>
         <form action="" method="POST">
             {{ form.as_p }}
             {% csrf_token %}
@@ -62,6 +62,7 @@
                 <div class="row columns dropdownform">
                     {% get_card_form card as card_form %}
                     <form action="{% url 'bikes:edit_card' %}" method="POST" style="float: right;" class="edit-card-form">
+                        <p><strong>WARNING: Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
                         {{ card_form.management_form }}
                         {{ card_form.number }}
                         {{ card_form.expiration }}
@@ -83,6 +84,7 @@
                     {% get_card_form None as card_form %}
                     <form action="{% url 'bikes:add_card' %}" method="POST"
                           class="add-card-form inserted-form m-0">
+                        <p><strong>WARNING: Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
                         {{ card_form.management_form }}
                         <input id="id_number" name="number" type="number" placeholder="credit card number" required />
                         {{ card_form.expiration }}

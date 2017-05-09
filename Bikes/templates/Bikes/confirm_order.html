@@ -3,7 +3,7 @@
 {% block title %}Order {% endblock %}
 
 {% block order_form %}
-    <div class="row ">
+    <div class="row " xmlns="http://www.w3.org/1999/html">
         <div class="col-lg-6 col-sm-10 col-sm-offset-1 ">
 
             <div class="left">
@@ -44,6 +44,7 @@
                 <button type="button" class="button dropdownform-button">Add another card</button>
                 <div class="inserted-form dropdownform " style="display: none;">
                     <form class="add-card-form" action="{% url 'bikes:add_card' %}" method="POST">
+                        <p><strong>WARNING! WARNING! WARING! Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
                         {{ add_card.as_p }}
                         {% csrf_token %}
                         <input type="submit" class="button" value="add">

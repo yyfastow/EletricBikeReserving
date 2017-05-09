@@ -79,6 +79,7 @@
                     <form action="{% url 'bikes:edit_card' %}" method="POST"
                           class="edit-card-form inserted-form m-0">
                         <p>Edit this card and all order's with this card</p>
+                        <p><strong>WARNING: Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
                         {{ card_form.management_form }}
                         {{ card_form.number }}
                         {{ card_form.expiration }}

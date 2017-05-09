@@ -405,6 +405,8 @@ def add_card(request):
 def edit_order(request):
     """form to edit information of user"""
     user = request.user
+    if user.is_superuser:
+        return admin_orders(request)
     order = models.Order.objects.get(name=user.username, email=user.email)
     form = forms.EditInfoForm(instance=order)
     billing = models.Billing.objects.filter(user_info=order)
@@ -510,6 +512,7 @@ def anought_orders(request, bike):
     """ function that is triggered when anought bikes are ordered. marks all bikes that status as reserved to shipping.
     """
     earlier_orders = models.Preorders.objects.filter(order=bike, status="reserved")
+
     for early in earlier_orders:
         user_in = early.user_info
         order = models.Order.objects.get(name=user_in.name, email=user_in.email)
@@ -518,36 +521,72 @@ def anought_orders(request, bike):
         # changes status of the order to "shipping"
         early.status = "shipping"
         early.save()
+        user_in.total_charge -= bike.price
+        user_in.save()
         # sends mail to admin
-        send_mail(
+        """send_mail(
             "Order for {}".format(bike.name),
-            """Bike: {}
+            ""Bike: {}
             Name: {}
             Phone Number: {}
             Billing Address: {} {} {} {}
             Credit Card Number: {}
             expiration: {}
             CCV number: {}
-            """.format(bike.name, user_in.name, user_in.phone, billing.address, billing.city,
+            "".format(bike.name, user_in.name, user_in.phone, billing.address, billing.city,
                        billing.state, billing.zip, card.number, card.expiration, card.ccv_number),
             '{} <{}>'.format(user_in.name, user_in.email),
             ['yoseffastow@gmail.com'],
-        )
-        # creates massage to show to user that item is ready to ship
-        carded = "{}".format(card.number)
+        )"""
+        nu = """Your order on {} is ready to shipped. We will ship it to {} and will charge credit card ending with
+        {} {}!""".format(bike.name, early.address, early.payment.number, bike.price)
         models.Message.objects.create(
             user=order,
-            message="""Order of bike {} is ready to be send to {} {} {} {}.
-                    We will charge your credit card ****-{} shortly {} price and ship it as soon as possible
-                    We will tell you when. """.format(bike.name, billing.address, billing.city,
-                                                      billing.state, billing.zip, carded[-4:],
-                                                      bike.price)
+            message=nu
         )
-        user = models.Order.objects.get(name=early.user_info.name)
-        user.total_charge -= bike.price
-        user.save()
+
+
     bike.orders = 0
     bike.save()
+
+
+
+    """ user_list = {}
+    for order in earlier_orders:
+        user = order.user_info
+        if user not in user_list:
+            user_list[user] = {
+                'billings': {order.address: 1},
+                'cards': {order.payment: order.order.price},
+                'total': order.order.price,
+                'amount': 1
+            }
+        else:
+            if order.address not in user_list[user]['billings']:
+                user_list[user]['billings'][order.address] = 1
+            else:
+                user_list[user]['billings'][order.address] += 1
+            if order.payment not in user_list[user]['cards']:
+                user_list[user]['cards'][order.payment] = order.order.price
+            else:
+                user_list[user]['cards'][order.payment] += order.order.price
+            user_list[user]['total'] += order.order.price
+            user_list[user]['amount'] += 1
+
+    for user, ord in enumerate(user_list):
+
+        # creates massage to show to user that item is ready to ship
+        # carded = "{}".format(card.number)
+        nu = "Your reservation on bike {} is ready to be shipped.".format(bike.name)
+        for key, value in enumerate(ord['billings']):
+            nu += "We will ship {} to {}.".format(value, key)
+        for key, value in enumerate(ord['cards']):
+            nu += "we will charge {} {}.".format(value, key)
+        models.Message.objects.create(
+            user=order,
+            message=nu
+        )
+        # user = models.Order.objects.get(name=early.user_info.name)"""
     messages.add_message(request, messages.SUCCESS, "You order is sent and ready for shipping")
 
 
@@ -601,6 +640,7 @@ def cancel_all_orders(request):
     return HttpResponseRedirect(reverse('bikes:user'))
 
 
+@login_required()
 def first_checkout(request):
     """ order for the first time """
     user = get_object_or_404(models.Order, name=request.user.username)
@@ -732,8 +772,11 @@ def checkout(request):
 def change_reservation_amount(request):
     if not request.user.is_superuser:
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    pk = request.POST.get('pk')
-    amount = int(request.POST.get('amount'))
+    try:
+        pk = request.POST.get('pk')
+        amount = int(request.POST.get('amount'))
+    except TypeError:
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     bike = models.Bikes.objects.get(pk=pk)
     if amount > 0:
         bike.orders_needed = amount
@@ -759,12 +802,12 @@ def admin_orders(request):
     return render(request, 'bikes/all_orders.html', {'orders': orders})
 
 
-login_required()
+@login_required()
 def admin_user_preorders(request, pk):
     """admin could see all orders by person """
     if not request.user.is_superuser:
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    order = models.Order.objects.get(pk=pk)
+    order = get_object_or_404(models.Order, pk=pk)
     reserved = models.Preorders.objects.filter(user_info=order, status="reserved")
     shipping = models.Preorders.objects.filter(user_info=order, status="shipping")
     shipped = models.Preorders.objects.filter(user_info=order, status="shipped")
@@ -816,7 +859,7 @@ def shipping_order(request):
     """ admin confirms that item is sent and marks it as shipped"""
     if not request.user.is_superuser:
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    address = models.Billing.objects.get(pk=request.POST.get('address'))
+    address = get_object_or_404(models.Billing, pk=request.POST.get('address'))
     user = models.Order.objects.get(pk=request.POST.get('user'))
     bike = models.Bikes.objects.get(pk=request.POST.get('bike'))
     preorders = models.Preorders.objects.filter(user_info=user, address=address, status="shipping",order=bike)
@@ -868,8 +911,8 @@ def recieved_order(request, pk):
     """ admin confirms that item is sent and marks it as received"""
     if not request.user.is_superuser:
         return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
-    preorder = models.Preorders.objects.get(pk=pk)
+    preorder = get_object_or_404(models.Preorders, pk=pk)
     preorder.status = 'received'
     preorder.save()
     messages.add_message(request, messages.SUCCESS, "Marked as received")
-    return HttpResponseRedirect(reverse('bikes:shipping'))
+    return HttpResponseRedirect(reverse('bikes:admin_shipping'))

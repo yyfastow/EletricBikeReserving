@@ -16,6 +16,7 @@
             {{ billing.as_p }}
             {% csrf_token %}
             <h4>Credit Card Info</h4>
+            <p><strong>WARNING! WARING! WARNING!: Don't put in your real information.</strong> This is just a demo. Just put in any random 16 numbers and any random ccv number</p>
             {{ card.as_p }}
             {% csrf_token %}
             <input type="submit" class="button" value="Make Order">

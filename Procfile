@@ -1,0 +1,1 @@
+web: gunicorn --pythonpath ChatBox ChatBox.deploy --log-file -
