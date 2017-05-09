@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="HSQLDB (Local) - jdbc:hsqldb:file:C:/Users/yosef/PycharmProjects/EletricBikeReserving/db.mangodb/" uuid="4b6eba13-72eb-4001-853d-7f97f9a14655">
+      <secret-storage>master_key</secret-storage>
+      <first-sync>true</first-sync>
+    </data-source>
+    <data-source name="Django default" uuid="2cbe3473-6a23-41ff-8b74-aae5e1662a59">
+      <auth-required>false</auth-required>
+      <first-sync>true</first-sync>
+    </data-source>
+  </component>
+</project>
