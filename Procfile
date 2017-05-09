@@ -1,1 +1,1 @@
-web: gunicorn --pythonpath ElectricBikeReserving ElectricBikeReserving.deploy --log-file -
+web: gunicorn --pythonpath EletricBikeReserving EletricBikeReserving.deploy --log-file -
